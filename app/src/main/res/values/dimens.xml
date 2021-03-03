@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cardImageViewSide">50dp</dimen>
+    <dimen name="cardHorizontalMargin">16dp</dimen>
+    <dimen name="cardListPadding">@dimen/cardHorizontalMargin</dimen>
+    <dimen name="cardPadding">@dimen/cardHorizontalMargin</dimen>
+    <dimen name="cardVerticalMargin">10dp</dimen>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/contact_card_background"
+    android:padding="@dimen/cardPadding">
+
+    <ImageView
+        android:id="@+id/contactCardPhoto"
+        android:layout_width="@dimen/cardImageViewSide"
+        android:layout_height="@dimen/cardImageViewSide"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/photo"
+        android:src="@drawable/ic_baseline_person_24"
+        app:tint="@color/colorPrimary" />
+
+    <TextView
+        android:id="@+id/contactCardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
+        android:layout_toEndOf="@id/contactCardPhoto"
+        android:text="@string/name" />
+
+    <TextView
+        android:id="@+id/contactCardPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/contactCardName"
+        android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
+        android:layout_marginTop="@dimen/cardVerticalMargin"
+        android:layout_toEndOf="@id/contactCardPhoto"
+        android:text="@string/phone" />
+</RelativeLayout>
