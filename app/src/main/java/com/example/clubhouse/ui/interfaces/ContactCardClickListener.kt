@@ -1,4 +1,4 @@
-package com.example.clubhouse.interfaces
+package com.example.clubhouse.ui.interfaces
 
 /**
  * Интерфейс, обрабатывающий клик на карточку контакта
