@@ -14,8 +14,6 @@ import kotlinx.coroutines.launch
 
 const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
-private const val ENTITY_KEY = "simple_contact_entity"
-
 class ContactListFragment :
     ContactServiceFragment(R.layout.fragment_contact_list),
     ContactServiceConsumer {
@@ -45,13 +43,13 @@ class ContactListFragment :
             }
         }
 
-        savedInstanceState?.getParcelable<SimpleContactEntity>(ENTITY_KEY)?.let {
+        savedInstanceState?.getParcelable<SimpleContactEntity>(CONTACT_ENTITY_KEY)?.let {
             updateContact(it)
         } ?: updateUI()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(ENTITY_KEY, contact)
+        outState.putParcelable(CONTACT_ENTITY_KEY, contact)
 
         super.onSaveInstanceState(outState)
     }

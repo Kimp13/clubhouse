@@ -2,7 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.clubhouse">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
+        android:name=".ContactApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,12 +16,22 @@
         <activity android:name="com.example.clubhouse.ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="@string/birthday_notification_action" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <service android:name=".ui.services.ContactService" />
+        <service android:name=".ui.services.BirthdayNotificationService" />
+        <service android:name=".ui.services.RebootReminderService" />
+
+        <receiver android:name=".ui.receivers.ContactBirthdayReceiver">
+            <intent-filter>
+                <action android:name="@string/birthday_action" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

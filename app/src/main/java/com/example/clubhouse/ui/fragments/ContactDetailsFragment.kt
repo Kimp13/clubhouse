@@ -1,34 +1,59 @@
 package com.example.clubhouse.ui.fragments
 
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
 import com.example.clubhouse.databinding.FragmentContactDetailsBinding
+import com.example.clubhouse.ui.delegates.ReminderDelegate
+import com.example.clubhouse.ui.interfaces.ContactEntityOwner
 import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
-import com.example.clubhouse.ui.services.ContactService
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
-
-private const val ARG_ID = "id"
-private const val ENTITY_KEY = "contact_entity"
+const val CONTACT_ENTITY_KEY = "contact_entity"
+const val CONTACT_ARG_ID = "argument_id"
 
 class ContactDetailsFragment :
     ContactServiceFragment(R.layout.fragment_contact_details),
-    ContactServiceConsumer {
+    ContactServiceConsumer,
+    ContactEntityOwner {
     companion object {
         fun newInstance(id: Int) = ContactDetailsFragment().apply {
             arguments = Bundle().apply {
-                putInt(ARG_ID, id)
+                putInt(CONTACT_ARG_ID, id)
             }
         }
     }
 
-    private var contact: ContactEntity? = null
+    private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
+    private var isReminded: Boolean = false
+        set(value) {
+            field = value
+
+            contactEntity?.let { contact ->
+                context?.let { context ->
+                    if (field) {
+                        ReminderDelegate.setReminder(context, contact)
+                    } else {
+                        ReminderDelegate.clearReminder(context, contact.id)
+                    }
+                }
+            }
+        }
+        get() {
+            contactEntity?.let { contact ->
+                context?.let { context ->
+                    return ReminderDelegate.isReminderSet(context, contact)
+                }
+            }
+
+            return false
+        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,13 +65,13 @@ class ContactDetailsFragment :
 
         binding = FragmentContactDetailsBinding.bind(view)
 
-        savedInstanceState?.getParcelable<ContactEntity>(ENTITY_KEY)?.let {
+        savedInstanceState?.getParcelable<ContactEntity>(CONTACT_ENTITY_KEY)?.let {
             updateContact(it)
         } ?: updateUI()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(ENTITY_KEY, contact)
+        outState.putParcelable(CONTACT_ENTITY_KEY, contactEntity)
 
         super.onSaveInstanceState(outState)
     }
@@ -61,12 +86,24 @@ class ContactDetailsFragment :
         updateUI()
     }
 
+    override fun getContact() = contactEntity
+
     private fun updateContact(contact: ContactEntity) {
-        this.contact = contact
+        this.contactEntity = contact
 
         binding?.run {
+            contactDetailsRemindTextView.visibility = View.VISIBLE
             contactDetailsName.text = contact.name
             contactDetailsDescription.text = contact.description
+
+            contactDetailsRemindSwitch.run {
+                visibility = View.VISIBLE
+                isChecked = isReminded
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    isReminded = isChecked
+                }
+            }
 
             val phonesIterator = contact.phoneNumbers.listIterator()
             val emailsIterator = contact.emails.listIterator()
@@ -92,6 +129,15 @@ class ContactDetailsFragment :
                     it.visibility = View.GONE
                 }
             }
+
+            contactDetailsBirthDate.text = getString(
+                R.string.birthday_fmt,
+                DateUtils.formatDateTime(
+                    requireContext(),
+                    contact.birthDate.timeInMillis,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
+                )
+            )
         }
     }
 
@@ -99,7 +145,7 @@ class ContactDetailsFragment :
         serviceOwner?.getService()?.let { service ->
             launch {
                 try {
-                    arguments?.getInt(ARG_ID)?.let {
+                    arguments?.getInt(CONTACT_ARG_ID)?.let {
                         updateContact(service.getContact(it))
                     }
                 } catch (e: CancellationException) {

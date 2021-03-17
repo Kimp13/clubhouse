@@ -15,13 +15,13 @@ class ContactService : Service() {
     }
 
     suspend fun getContacts() = withContext(Dispatchers.IO) {
-        delay(3000)
+        delay(500)
 
-        MockDataSource.getContacts()
+        MockDataSource.getSimpleContacts()
     }
 
     suspend fun getContact(id: Int) = withContext(Dispatchers.IO) {
-        delay(3000)
+        delay(500)
 
         MockDataSource.getContact(id)
     }
