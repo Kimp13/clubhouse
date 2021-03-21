@@ -1,23 +1,25 @@
 package com.example.clubhouse.ui.activities
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clubhouse.R
-import com.example.clubhouse.ui.fragments.CONTACT_DETAILS_FRAGMENT_TAG
-import com.example.clubhouse.ui.fragments.CONTACT_LIST_FRAGMENT_TAG
-import com.example.clubhouse.ui.fragments.ContactDetailsFragment
-import com.example.clubhouse.ui.fragments.ContactListFragment
+import com.example.clubhouse.ui.fragments.*
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
 import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
 import com.example.clubhouse.ui.interfaces.ContactServiceOwner
 import com.example.clubhouse.ui.services.ContactService
 import kotlin.properties.Delegates
+
+const val CONTACT_ARG_NULL_VALUE = -1
 
 private const val FRAGMENT_TAG_KEY = "fragment_tag"
 
@@ -46,6 +48,7 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        createNotificationChannel()
 
         bindService(
             Intent(this, ContactService::class.java),
@@ -66,6 +69,15 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
 
                 CONTACT_LIST_FRAGMENT_TAG
             }
+
+        intent?.getIntExtra(
+            CONTACT_ARG_ID,
+            CONTACT_ARG_NULL_VALUE
+        )?.let {
+            if (it != CONTACT_ARG_NULL_VALUE) {
+                onCardClick(it)
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -112,4 +124,17 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
         } else {
             null
         }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+                .createNotificationChannel(NotificationChannel(
+                    getString(R.string.birthday_channel_id),
+                    getString(R.string.birthday_channel_name),
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = getString(R.string.birthday_channel_description)
+                })
+        }
+    }
 }

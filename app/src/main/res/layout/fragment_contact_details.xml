@@ -54,11 +54,36 @@
         app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail1" />
 
     <TextView
+        android:id="@+id/contactDetailsBirthDate"
+        style="@style/ContactDetailsListItem"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail2" />
+
+    <TextView
         android:id="@+id/contactDetailsDescription"
         android:layout_width="0dp"
         android:layout_height="@dimen/cardImageViewSide"
         android:gravity="center_vertical|start"
         android:text="@string/description"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail2" />
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsBirthDate" />
+
+    <TextView
+        android:id="@+id/contactDetailsRemindTextView"
+        style="@style/ContactDetailsListItem"
+        android:layout_marginTop="@dimen/cardListPadding"
+        android:text="@string/remind_about_birthday"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/contactDetailsRemindSwitch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsDescription" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/contactDetailsRemindSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/contactDetailsRemindTextView"
+        app:layout_constraintTop_toBottomOf="@id/contactDetailsDescription" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,8 +5,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ContactEntity(
+    val id: Int,
     val name: String,
     val phoneNumbers: List<String>,
     val emails: List<String>,
-    val description: String
+    val description: String,
+    val birthDate: BirthDate
 ) : Parcelable

@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Clubhouse</string>
+    <string name="birthday_action" translatable="false">clubhouse_birthday_action</string>
+    <string name="birthday_notification_action" translatable="false">
+        clubhouse_notification_birthday_action
+    </string>
+    <string name="birthday_channel_id" translatable="false">clubhouse_notification</string>
+
     <string name="photo">Photo</string>
     <string name="name">Name</string>
     <string name="phone">Phone</string>
@@ -10,4 +16,16 @@
     <string name="contact_list">Contact list</string>
     <string name="contact_details">Contact details</string>
     <string name="no_phone_number">No phone number</string>
+    <string name="birthday_fmt">Birthday: %s</string>
+    <string name="remind_about_birthday">Remind you about birthday?</string>
+    <string name="remind">Remind</string>
+    <string name="dont_remind">Don\'t remind</string>
+    <string name="someone_has_birthday_today_fmt">%s has birthday today!</string>
+    <string name="birthday_content_text">What about saying \'Hey\'?</string>
+    <string name="birthday_channel_name">Birthday notification channel</string>
+    <string name="birthday_channel_description">Welp, its name speaks for itself</string>
+    <string name="happy_birthday">Happy birthday!</string>
+    <string name="birthday_presents">Birthday presents!</string>
+    <string name="getting_data_about_birthday_kid">Getting data about birthday kid…</string>
+    <string name="getting_data_about_birthday_kids">Getting data about birthday kids…</string>
 </resources>
