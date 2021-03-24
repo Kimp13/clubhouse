@@ -16,6 +16,8 @@
     <string name="contact_list">Contact list</string>
     <string name="contact_details">Contact details</string>
     <string name="no_phone_number">No phone number</string>
+    <string name="no_name">No name</string>
+    <string name="no_description">No description</string>
     <string name="birthday_fmt">Birthday: %s</string>
     <string name="remind_about_birthday">Remind you about birthday?</string>
     <string name="remind">Remind</string>
@@ -28,4 +30,13 @@
     <string name="birthday_presents">Birthday presents!</string>
     <string name="getting_data_about_birthday_kid">Getting data about birthday kid…</string>
     <string name="getting_data_about_birthday_kids">Getting data about birthday kids…</string>
+    <string name="ok">OK</string>
+    <string name="we_beg_you">We beg you!</string>
+    <string name="request_contact_read_permission">
+        Please, permit the app to read your contacts.
+    </string>
+    <string name="request_contact_read_permission_again">
+        We really need the permission to read your contacts. Without it, our app is pointless!
+    </string>
+    <string name="permit">Permit</string>
 </resources>

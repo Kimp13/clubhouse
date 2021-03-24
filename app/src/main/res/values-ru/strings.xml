@@ -22,4 +22,11 @@
     <string name="happy_birthday">С днём рождения!</string>
     <string name="getting_data_about_birthday_kids">Получаю данные об именинниках…</string>
     <string name="birthday_presents">Подарки на день рождения!</string>
+    <string name="request_contact_read_permission_again">Нам очень нужно разрешение на чтение Ваших контаков! Без него наше приложение бесполезно.</string>
+    <string name="permit">Разрешить</string>
+    <string name="we_beg_you">Умоляем Вас!</string>
+    <string name="request_contact_read_permission">Пожалуйста, разрешите приложению получать Ваши контакты.</string>
+    <string name="ok">ОК</string>
+    <string name="no_name">Нет имени</string>
+    <string name="no_description">Нет описания</string>
 </resources>

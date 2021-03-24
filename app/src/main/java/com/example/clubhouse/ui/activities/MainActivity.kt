@@ -1,32 +1,81 @@
 package com.example.clubhouse.ui.activities
 
+import android.Manifest
+import android.app.ActionBar
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.clubhouse.R
-import com.example.clubhouse.ui.fragments.*
+import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
+import com.example.clubhouse.ui.fragments.CONTACT_DETAILS_FRAGMENT_TAG
+import com.example.clubhouse.ui.fragments.CONTACT_LIST_FRAGMENT_TAG
+import com.example.clubhouse.ui.fragments.ContactDetailsFragment
+import com.example.clubhouse.ui.fragments.ContactListFragment
+import com.example.clubhouse.ui.fragments.REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG
+import com.example.clubhouse.ui.fragments.RequestPermissionDialogFragment
+import com.example.clubhouse.ui.fragments.RequestReadContactsPermissionFragment
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
 import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
 import com.example.clubhouse.ui.interfaces.ContactServiceOwner
+import com.example.clubhouse.ui.interfaces.PoppableBackStackOwner
+import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
+import com.example.clubhouse.ui.interfaces.RequestPermissionDialogDismissListener
 import com.example.clubhouse.ui.services.ContactService
 import kotlin.properties.Delegates
 
-const val CONTACT_ARG_NULL_VALUE = -1
-
 private const val FRAGMENT_TAG_KEY = "fragment_tag"
 
-class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServiceOwner {
+class MainActivity :
+    AppCompatActivity(),
+    ContactCardClickListener,
+    ContactServiceOwner,
+    PoppableBackStackOwner,
+    ReadContactsPermissionRequester,
+    RequestPermissionDialogDismissListener {
     private var bound = false
     private lateinit var contactService: ContactService
     private var currentFragmentTag: String by Delegates.notNull()
+    private var requestSuccessCallback: (() -> Unit)? = null
+    private var requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            requestSuccessCallback?.invoke()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.READ_CONTACTS
+                )
+            ) {
+                RequestPermissionDialogFragment().show(
+                    supportFragmentManager,
+                    null
+                )
+            } else {
+                currentFragmentTag = REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG
+
+                supportFragmentManager
+                    .beginTransaction()
+                    .replace(
+                        R.id.mainActivityRootLayout,
+                        RequestReadContactsPermissionFragment(),
+                        currentFragmentTag
+                    )
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+    }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, iBinder: IBinder) {
@@ -70,13 +119,10 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
                 CONTACT_LIST_FRAGMENT_TAG
             }
 
-        intent?.getIntExtra(
-            CONTACT_ARG_ID,
-            CONTACT_ARG_NULL_VALUE
+        intent?.getStringExtra(
+            CONTACT_ARG_LOOKUP_KEY
         )?.let {
-            if (it != CONTACT_ARG_NULL_VALUE) {
-                onCardClick(it)
-            }
+            onCardClick(it)
         }
     }
 
@@ -96,6 +142,17 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
         super.onDestroy()
     }
 
+    override fun onBackPressed() {
+        supportActionBar?.displayOptions?.run {
+            if (and(ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+                supportFragmentManager.popBackStack()
+                return
+            }
+        }
+
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         android.R.id.home -> {
             onBackPressed()
@@ -104,18 +161,22 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
         else -> super.onOptionsItemSelected(item)
     }
 
-    override fun onCardClick(id: Int) {
+    override fun onCardClick(lookup: String) {
         currentFragmentTag = CONTACT_DETAILS_FRAGMENT_TAG
 
         supportFragmentManager
             .beginTransaction()
             .replace(
                 R.id.mainActivityRootLayout,
-                ContactDetailsFragment.newInstance(id),
+                ContactDetailsFragment.newInstance(lookup),
                 CONTACT_DETAILS_FRAGMENT_TAG
             )
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun popBackStack() {
+        supportFragmentManager.popBackStack()
     }
 
     override fun getService(): ContactService? =
@@ -125,16 +186,41 @@ class MainActivity : AppCompatActivity(), ContactCardClickListener, ContactServi
             null
         }
 
+    override fun checkPermission() = ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.READ_CONTACTS
+    ) == PackageManager.PERMISSION_GRANTED
+
+    override fun requestPermission(onSuccess: () -> Unit) {
+        if (checkPermission()) {
+            onSuccess()
+        } else {
+            requestSuccessCallback = onSuccess
+            requestPermissionLauncher.launch(
+                Manifest.permission.READ_CONTACTS
+            )
+        }
+    }
+
+    override fun onRequestDialogDismissed() {
+        requestPermissionLauncher.launch(
+            Manifest.permission.READ_CONTACTS
+        )
+    }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-                .createNotificationChannel(NotificationChannel(
-                    getString(R.string.birthday_channel_id),
-                    getString(R.string.birthday_channel_name),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = getString(R.string.birthday_channel_description)
-                })
+                .createNotificationChannel(
+                    NotificationChannel(
+                        getString(R.string.birthday_channel_id),
+                        getString(R.string.birthday_channel_name),
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    ).apply {
+                        description = getString(R.string.birthday_channel_description)
+                    })
         }
     }
+
+
 }

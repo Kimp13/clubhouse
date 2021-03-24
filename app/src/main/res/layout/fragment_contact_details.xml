@@ -17,10 +17,10 @@
 
     <TextView
         android:id="@+id/contactDetailsName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/cardImageViewSide"
         android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
-        android:gravity="center_vertical|start"
+        android:gravity="center_vertical"
         android:text="@string/name"
         app:layout_constraintStart_toEndOf="@id/contactDetailsPhoto"
         app:layout_constraintTop_toTopOf="parent" />
@@ -61,9 +61,9 @@
 
     <TextView
         android:id="@+id/contactDetailsDescription"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="@dimen/cardImageViewSide"
-        android:gravity="center_vertical|start"
+        android:gravity="center_vertical"
         android:text="@string/description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/contactDetailsBirthDate" />
