@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clubhouse.R
+import com.example.clubhouse.data.DataSource
 import com.example.clubhouse.data.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
@@ -15,31 +16,33 @@ import kotlinx.coroutines.launch
 const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
 class ContactListFragment :
-    ContactServiceFragment(R.layout.fragment_contact_list),
+    ContactFragment(R.layout.fragment_contact_list),
     ContactServiceConsumer {
     private var binding: FragmentContactListBinding? = null
-    private var listener: ContactCardClickListener? = null
+    private var cardClickListener: ContactCardClickListener? = null
     private var contact: SimpleContactEntity? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         if (context is ContactCardClickListener) {
-            listener = context
+            cardClickListener = context
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as AppCompatActivity?)?.supportActionBar?.apply {
+        (activity as? AppCompatActivity)?.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(false)
             setTitle(R.string.contact_list)
         }
 
         binding = FragmentContactListBinding.bind(view).apply {
             contactCard.root.setOnClickListener {
-                listener?.onCardClick(1)
+                contact?.lookup?.let { lookup ->
+                    cardClickListener?.onCardClick(lookup)
+                }
             }
         }
 
@@ -61,12 +64,14 @@ class ContactListFragment :
     }
 
     override fun onDetach() {
-        listener = null
+        cardClickListener = null
 
         super.onDetach()
     }
 
     override fun onServiceBoundListener() {
+        serviceBound = true
+
         updateUI()
     }
 
@@ -74,22 +79,34 @@ class ContactListFragment :
         this.contact = contact
 
         binding?.contactCard?.run {
-            contactCardName.text = contact.name
+            contact.photoId?.let {
+                contactCardPhoto.run {
+                    setImageURI(DataSource.makePhotoUri(it))
+
+                    imageTintList = null
+                }
+            }
+
+            contactCardName.text = contact.name ?: getString(
+                R.string.no_name
+            )
             contactCardPhone.text = contact.phoneNumber ?: getString(
                 R.string.no_phone_number
             )
         }
     }
 
-    private fun updateUI() {
-        serviceOwner?.getService()?.let { service ->
-            launch {
-                try {
-                    service.getContacts().firstOrNull()?.let {
-                        updateContact(it)
+    override fun updateUI() {
+        if (serviceBound && permissionGranted) {
+            serviceOwner?.getService()?.let { service ->
+                launch {
+                    try {
+                        service.getSimpleContacts().firstOrNull()?.let {
+                            updateContact(it)
+                        }
+                    } catch (e: CancellationException) {
+                        println("Interrupted")
                     }
-                } catch (e: CancellationException) {
-                    println("Interrupted")
                 }
             }
         }

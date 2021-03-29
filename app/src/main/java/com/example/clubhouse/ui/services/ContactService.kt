@@ -4,8 +4,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.example.clubhouse.data.MockDataSource
-import kotlinx.coroutines.*
+import com.example.clubhouse.data.DataSource
+import com.example.clubhouse.data.SimpleContactEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ContactService : Service() {
     private val binder = ContactBinder()
@@ -14,16 +16,13 @@ class ContactService : Service() {
         return binder
     }
 
-    suspend fun getContacts() = withContext(Dispatchers.IO) {
-        delay(500)
-
-        MockDataSource.getSimpleContacts()
+    suspend fun getSimpleContacts():
+            List<SimpleContactEntity> = withContext(Dispatchers.IO) {
+        DataSource.getSimpleContacts(contentResolver)
     }
 
-    suspend fun getContact(id: Int) = withContext(Dispatchers.IO) {
-        delay(500)
-
-        MockDataSource.getContact(id)
+    suspend fun getContact(lookup: String) = withContext(Dispatchers.IO) {
+        DataSource.getContact(contentResolver, lookup)
     }
 
     inner class ContactBinder : Binder() {

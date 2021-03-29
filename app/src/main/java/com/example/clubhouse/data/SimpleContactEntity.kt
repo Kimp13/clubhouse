@@ -5,6 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class SimpleContactEntity(
-    val name: String,
-    val phoneNumber: String?
+    val id: Long,
+    val lookup: String,
+    val name: String? = null,
+    var phoneNumber: String? = null,
+    var photoId: Long? = null
 ) : Parcelable

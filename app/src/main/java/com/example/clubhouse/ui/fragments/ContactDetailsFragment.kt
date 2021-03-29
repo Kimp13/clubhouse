@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
+import com.example.clubhouse.data.DataSource
 import com.example.clubhouse.databinding.FragmentContactDetailsBinding
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.interfaces.ContactEntityOwner
@@ -15,16 +16,16 @@ import kotlin.coroutines.cancellation.CancellationException
 
 const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
 const val CONTACT_ENTITY_KEY = "contact_entity"
-const val CONTACT_ARG_ID = "argument_id"
+const val CONTACT_ARG_LOOKUP_KEY = "argument_lookup_key"
 
 class ContactDetailsFragment :
-    ContactServiceFragment(R.layout.fragment_contact_details),
+    ContactFragment(R.layout.fragment_contact_details),
     ContactServiceConsumer,
     ContactEntityOwner {
     companion object {
-        fun newInstance(id: Int) = ContactDetailsFragment().apply {
+        fun newInstance(lookup: String) = ContactDetailsFragment().apply {
             arguments = Bundle().apply {
-                putInt(CONTACT_ARG_ID, id)
+                putString(CONTACT_ARG_LOOKUP_KEY, lookup)
             }
         }
     }
@@ -58,7 +59,7 @@ class ContactDetailsFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as AppCompatActivity?)?.supportActionBar?.apply {
+        (activity as? AppCompatActivity)?.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setTitle(R.string.contact_details)
         }
@@ -83,6 +84,8 @@ class ContactDetailsFragment :
     }
 
     override fun onServiceBoundListener() {
+        serviceBound = true
+
         updateUI()
     }
 
@@ -92,18 +95,17 @@ class ContactDetailsFragment :
         this.contactEntity = contact
 
         binding?.run {
-            contactDetailsRemindTextView.visibility = View.VISIBLE
-            contactDetailsName.text = contact.name
-            contactDetailsDescription.text = contact.description
+            contact.photoId?.let {
+                contactDetailsPhoto.run {
+                    setImageURI(DataSource.makePhotoUri(it))
 
-            contactDetailsRemindSwitch.run {
-                visibility = View.VISIBLE
-                isChecked = isReminded
-
-                setOnCheckedChangeListener { _, isChecked ->
-                    isReminded = isChecked
+                    imageTintList = null
                 }
             }
+
+            contactDetailsName.text = contact.name ?: getString(R.string.no_name)
+            contactDetailsDescription.text =
+                contact.description ?: getString(R.string.no_description)
 
             val phonesIterator = contact.phoneNumbers.listIterator()
             val emailsIterator = contact.emails.listIterator()
@@ -130,26 +132,41 @@ class ContactDetailsFragment :
                 }
             }
 
-            contactDetailsBirthDate.text = getString(
-                R.string.birthday_fmt,
-                DateUtils.formatDateTime(
-                    requireContext(),
-                    contact.birthDate.timeInMillis,
-                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
+            contact.birthDate?.run {
+                contactDetailsRemindTextView.visibility = View.VISIBLE
+
+                contactDetailsRemindSwitch.run {
+                    visibility = View.VISIBLE
+                    isChecked = isReminded
+
+                    setOnCheckedChangeListener { _, isChecked ->
+                        isReminded = isChecked
+                    }
+                }
+
+                contactDetailsBirthDate.text = getString(
+                    R.string.birthday_fmt,
+                    DateUtils.formatDateTime(
+                        requireContext(),
+                        timeInMillis,
+                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
+                    )
                 )
-            )
+            }
         }
     }
 
-    private fun updateUI() {
-        serviceOwner?.getService()?.let { service ->
-            launch {
-                try {
-                    arguments?.getInt(CONTACT_ARG_ID)?.let {
-                        updateContact(service.getContact(it))
+    override fun updateUI() {
+        if (serviceBound && permissionGranted) {
+            serviceOwner?.getService()?.let { service ->
+                launch {
+                    try {
+                        arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let {
+                            updateContact(service.getContact(it))
+                        }
+                    } catch (e: CancellationException) {
+                        println("Interrupted")
                     }
-                } catch (e: CancellationException) {
-                    println("Interrupted")
                 }
             }
         }

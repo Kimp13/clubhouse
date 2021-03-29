@@ -1,7 +1,6 @@
 package com.example.clubhouse.ui.services
 
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -9,37 +8,30 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.MockDataSource
-import com.example.clubhouse.ui.activities.CONTACT_ARG_NULL_VALUE
+import com.example.clubhouse.data.DataSource
 import com.example.clubhouse.ui.activities.MainActivity
 import com.example.clubhouse.ui.delegates.ReminderDelegate
-import com.example.clubhouse.ui.fragments.CONTACT_ARG_ID
-import kotlinx.coroutines.*
+import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.coroutines.CoroutineContext
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b1011010
 
-class BirthdayNotificationService : Service(), CoroutineScope {
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-
+class BirthdayNotificationService : StartedContactService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             initializeForeground()
         }
 
-        intent?.getIntExtra(
-            CONTACT_ARG_ID,
-            CONTACT_ARG_NULL_VALUE
-        )?.let { id ->
-            if (id != CONTACT_ARG_NULL_VALUE) {
+        intent?.getStringExtra(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
+            if (checkReadContactsPermission()) {
                 launch {
                     try {
-                        delay(2000)
-
-                        val contact = MockDataSource.getContact(id)
+                        val contact = DataSource.getContact(
+                            contentResolver,
+                            lookup
+                        )
 
                         showBirthdayNotification(contact)
                         ReminderDelegate.setReminder(
@@ -64,12 +56,6 @@ class BirthdayNotificationService : Service(), CoroutineScope {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onDestroy() {
-        job.cancel()
-
-        super.onDestroy()
-    }
 
     private fun initializeForeground() {
         startForeground(
@@ -97,7 +83,7 @@ class BirthdayNotificationService : Service(), CoroutineScope {
 
     private fun showBirthdayNotification(contact: ContactEntity) {
         NotificationManagerCompat.from(this).notify(
-            contact.id,
+            contact.id.toInt(),
             NotificationCompat
                 .Builder(
                     this,
@@ -117,9 +103,9 @@ class BirthdayNotificationService : Service(), CoroutineScope {
                 .setContentIntent(
                     PendingIntent.getActivity(
                         this,
-                        contact.id,
+                        contact.id.toInt(),
                         Intent(this, MainActivity::class.java).apply {
-                            putExtra(CONTACT_ARG_ID, contact.id)
+                            putExtra(CONTACT_ARG_LOOKUP_KEY, contact.lookup)
 
                             action = getString(
                                 R.string.birthday_notification_action

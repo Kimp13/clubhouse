@@ -9,13 +9,13 @@ import android.os.Build
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
 import com.example.clubhouse.data.isLeap
-import com.example.clubhouse.ui.fragments.CONTACT_ARG_ID
+import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.clubhouse.ui.receivers.ContactBirthdayReceiver
 import com.example.clubhouse.ui.services.RebootReminderService
 import java.util.*
 
 const val CONTACT_SHARED_PREFERENCES_KEY = "contact_shared_prefs"
-const val CONTACT_IDS_ARRAY_KEY = "contact_ids_array"
+const val CONTACT_LOOKUPS_ARRAY_KEY = "contact_lookups_array"
 
 object ReminderDelegate {
     private var alarmManager: AlarmManager? = null
@@ -29,17 +29,17 @@ object ReminderDelegate {
         if (!isReminderSet(context, contact)) {
             alarmIntent = PendingIntent.getBroadcast(
                 context,
-                contact.id,
+                contact.id.toInt(),
                 intent,
                 0
             )
         }
 
-        writeContactId(contact.id)
+        writeContactInfo(contact.id, contact.lookup)
         scheduleAlarm(contact)
     }
 
-    fun clearReminder(context: Context, contactId: Int) {
+    fun clearReminder(context: Context, contactId: Long) {
         checkAlarmManager(context)
         checkSharedPreferences(context)
 
@@ -58,7 +58,7 @@ object ReminderDelegate {
 
         alarmIntent = PendingIntent.getBroadcast(
             context,
-            contact.id,
+            contact.id.toInt(),
             intent,
             PendingIntent.FLAG_NO_CREATE
         )
@@ -74,11 +74,15 @@ object ReminderDelegate {
                 context,
                 RebootReminderService::class.java
             ).apply {
-                putExtra(
-                    CONTACT_IDS_ARRAY_KEY,
-                    keys.filterNotNull().map {
-                        it.toInt()
-                    }.toIntArray()
+                val valuesList = arrayListOf<String?>()
+
+                values.forEach {
+                    valuesList.add(it as? String)
+                }
+
+                putStringArrayListExtra(
+                    CONTACT_LOOKUPS_ARRAY_KEY,
+                    valuesList
                 )
             }.let {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -90,10 +94,10 @@ object ReminderDelegate {
         }
     }
 
-    private fun writeContactId(contactId: Int) {
+    private fun writeContactInfo(contactId: Long, contactKey: String) {
         sharedPreferences
             ?.edit()
-            ?.putBoolean(contactId.toString(), true)
+            ?.putString(contactId.toString(), contactKey)
             ?.apply()
     }
 
@@ -108,30 +112,35 @@ object ReminderDelegate {
 
     private fun scheduleAlarm(contact: ContactEntity) {
         Calendar.getInstance().run {
-            val previous = timeInMillis
+            contact.birthDate?.let {
+                val previous = timeInMillis
 
-            set(Calendar.MONTH, contact.birthDate.month)
-            set(Calendar.DAY_OF_MONTH, contact.birthDate.day)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
+                set(Calendar.MONTH, it.month)
+                set(Calendar.DAY_OF_MONTH, it.day)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
 
-            if (timeInMillis <= previous) {
-                set(Calendar.YEAR, get(Calendar.YEAR) + 1)
-            }
-
-            if (contact.birthDate.isLeap()) {
-                while (!isLeap()) {
-                    set(Calendar.YEAR, (get(Calendar.YEAR) / 4 + 1) * 4)
+                if (timeInMillis <= previous) {
+                    set(Calendar.YEAR, get(Calendar.YEAR) + 1)
                 }
-            }
 
-            alarmManager?.set(
-                AlarmManager.RTC,
-                timeInMillis,
-                alarmIntent
-            )
+                if (it.isLeap()) {
+                    while (!isLeap()) {
+                        set(Calendar.YEAR, (get(Calendar.YEAR) / 4 + 1) * 4)
+                    }
+
+                    set(Calendar.MONTH, it.month)
+                    set(Calendar.DAY_OF_MONTH, it.day)
+                }
+
+                alarmManager?.set(
+                    AlarmManager.RTC,
+                    timeInMillis,
+                    alarmIntent
+                )
+            }
         }
     }
 
@@ -143,7 +152,7 @@ object ReminderDelegate {
         ContactBirthdayReceiver::class.java
     ).apply {
         action = context.getString(R.string.birthday_action)
-        putExtra(CONTACT_ARG_ID, contact.id)
+        putExtra(CONTACT_ARG_LOOKUP_KEY, contact.lookup)
     }
 
     private fun checkAlarmManager(context: Context) {
