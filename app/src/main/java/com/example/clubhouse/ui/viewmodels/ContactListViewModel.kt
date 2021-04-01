@@ -11,25 +11,36 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class ContactListViewModel(application: Application) : AndroidViewModel(application) {
+class ContactListViewModel(application: Application) :
+    AndroidViewModel(application) {
     val contactList: LiveData<List<SimpleContactEntity>>
         get() = mutableContactList
+
+    var searchQuery: String? = null
+        private set
 
     private val mutableContactList =
         MutableLiveData<List<SimpleContactEntity>>()
 
-    fun search() {
-        if (mutableContactList.value != null) {
-            mutableContactList.value = mutableContactList.value
+    fun provideContactList(query: String? = null) {
+        if (query == null) {
+            if (mutableContactList.value != null) {
+                mutableContactList.value = mutableContactList.value
+            }
+        } else {
+            searchQuery = query
         }
 
-        refreshContactList()
+        refreshContactList(searchQuery)
     }
 
-    fun refreshContactList() {
+    fun refreshContactList(query: String? = searchQuery) {
         viewModelScope.launch {
             try {
-                ContactRepository.getSimpleContacts(getApplication())?.let {
+                ContactRepository.getSimpleContacts(
+                    getApplication(),
+                    query
+                )?.let {
                     mutableContactList.postValue(it)
                 }
             } catch (e: CancellationException) {

@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/contactListSearch"
+        android:title="@string/search_contacts"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:queryHint="@string/search_contacts"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/menuRefresh"
         android:title="@string/refresh"
         app:showAsAction="never" />

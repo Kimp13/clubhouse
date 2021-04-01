@@ -15,35 +15,40 @@ import timber.log.Timber
 private const val FOREGROUND_NOTIFICATION_ID = -0b10010101
 
 class RebootReminderService : StartedContactService() {
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             initializeForeground()
         }
 
-        intent?.extras?.getStringArrayList(CONTACT_LOOKUPS_ARRAY_KEY)?.let { lookups ->
-            if (checkReadContactsPermission()) {
-                launch {
-                    try {
-                        ContactRepository.getContacts(
-                            this@RebootReminderService,
-                            lookups
-                        ).forEach {
-                            ReminderDelegate.setReminder(
+        intent?.extras?.getStringArrayList(CONTACT_LOOKUPS_ARRAY_KEY)
+            ?.let { lookups ->
+                if (checkReadContactsPermission()) {
+                    launch {
+                        try {
+                            ContactRepository.getContacts(
                                 this@RebootReminderService,
-                                it
-                            )
+                                lookups
+                            ).forEach {
+                                ReminderDelegate.setReminder(
+                                    this@RebootReminderService,
+                                    it
+                                )
+                            }
+                        } catch (e: CancellationException) {
+                            Timber.d("Service job cancelled\n$e")
+                        } finally {
+                            stopForeground(true)
+                            stopSelf()
                         }
-                    } catch (e: CancellationException) {
-                        Timber.d("Service job cancelled\n$e")
-                    } finally {
-                        stopForeground(true)
-                        stopSelf()
                     }
-                }
 
-                return START_NOT_STICKY
+                    return START_NOT_STICKY
+                }
             }
-        }
 
         stopForeground(true)
         stopSelf()

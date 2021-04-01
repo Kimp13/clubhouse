@@ -20,6 +20,9 @@ private const val CONTACT_ID_INDEX = 0
 private const val CONTACT_LOOKUP_INDEX = 1
 private const val CONTACT_NAME_INDEX = 2
 
+private const val SIMPLE_CONTACT_SELECTION =
+    "${ContactsContract.Contacts.DISPLAY_NAME} like ?"
+
 private const val SIMPLE_DATA_SELECTION =
     "${ContactsContract.Data.MIMETYPE} in ('${
         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
@@ -48,16 +51,27 @@ object ContactRepository {
         )
 
     suspend fun getSimpleContacts(
-        context: Context
+        context: Context,
+        query: String?
     ): List<SimpleContactEntity>? = withContext(Dispatchers.IO) {
         context.contentResolver?.let { contentResolver ->
             val contacts = mutableListOf<SimpleContactEntity>()
+            val selection: String?
+            val selectionArgs: Array<String>?
+
+            if (query == null || query.isBlank()) {
+                selection = null
+                selectionArgs = null
+            } else {
+                selection = SIMPLE_CONTACT_SELECTION
+                selectionArgs = arrayOf("%${query}%")
+            }
 
             contentResolver.query(
                 ContactsContract.Contacts.CONTENT_URI,
                 CONTACT_PROJECTION,
-                null,
-                null,
+                selection,
+                selectionArgs,
                 CONTACT_SORT_ORDER
             )?.use {
                 if (it.moveToFirst()) {
@@ -95,13 +109,18 @@ object ContactRepository {
                                             contacts[i].phoneNumber = phone
                                         }
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Photo
                                         .CONTENT_ITEM_TYPE -> {
-                                        contacts[i].photoId = it.getLong(
+                                        it.getLong(
                                             DATA_PHOTO_ID_INDEX
-                                        )
+                                        ).let { rowPhotoId ->
+                                            if (rowPhotoId > 0) {
+                                                contacts[i].photoId = rowPhotoId
+                                            }
+                                        }
                                     }
                                 }
                             } while (it.moveToNext())
@@ -118,7 +137,8 @@ object ContactRepository {
         context: Context,
         lookups: List<String?>
     ): List<ContactEntity> = withContext(Dispatchers.IO) {
-        val contacts: MutableList<ContactEntity?> = MutableList(lookups.size) { null }
+        val contacts: MutableList<ContactEntity?> =
+            MutableList(lookups.size) { null }
 
         List(lookups.size) { i ->
             launch {
@@ -180,6 +200,7 @@ object ContactRepository {
                                             DATA_FIELD_INDEX
                                         )
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Email
@@ -190,6 +211,7 @@ object ContactRepository {
                                             emails.add(email)
                                         }
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Phone
@@ -200,12 +222,15 @@ object ContactRepository {
                                             phones.add(phone)
                                         }
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Note
                                         .CONTENT_ITEM_TYPE -> {
-                                        description = it.getString(DATA_FIELD_INDEX)
+                                        description =
+                                            it.getString(DATA_FIELD_INDEX)
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Event
@@ -228,13 +253,19 @@ object ContactRepository {
                                                 }
                                         }
                                     }
+
                                     ContactsContract
                                         .CommonDataKinds
                                         .Photo
                                         .CONTENT_ITEM_TYPE -> {
-                                        photoId = it.getLong(
+                                        it.getLong(
                                             DATA_PHOTO_ID_INDEX
-                                        )
+                                        ).let { rowPhotoId ->
+                                            if (rowPhotoId > 0) {
+                                                photoId = rowPhotoId
+                                            }
+                                        }
+
                                     }
                                 }
                             } while (it.moveToNext())
@@ -244,7 +275,14 @@ object ContactRepository {
             ).joinAll()
 
             ContactEntity(
-                id, lookup, name, phones, emails, description, birthDate, photoId
+                id,
+                lookup,
+                name,
+                phones,
+                emails,
+                description,
+                birthDate,
+                photoId
             )
         }
     }

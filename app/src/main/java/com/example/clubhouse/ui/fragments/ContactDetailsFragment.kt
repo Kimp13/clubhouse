@@ -178,6 +178,9 @@ class ContactDetailsFragment :
     }
 
     private fun initializeRefreshView() {
+        binding?.contactDetailsRefreshView?.setColorSchemeResources(
+            R.color.colorPrimary
+        )
         binding?.contactDetailsRefreshView?.setOnRefreshListener {
             refreshContactDetails()
         }
