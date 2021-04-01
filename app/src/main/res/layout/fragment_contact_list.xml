@@ -4,14 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contactListRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="@dimen/cardListPadding">
-
-        <include
-            android:id="@+id/contactCard"
-            layout="@layout/contact_card" />
-    </LinearLayout>
+        android:scrollbars="vertical" />
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

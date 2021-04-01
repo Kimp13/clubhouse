@@ -29,5 +29,8 @@
     <string name="ok">ОК</string>
     <string name="no_name">Нет имени</string>
     <string name="no_description">Нет описания</string>
+    <string name="search_contacts">Поиск по контактам…</string>
     <string name="refresh">Обновить</string>
+    <string name="hello_world">Привет, Мир!</string>
+    <string name="total_contacts">Всего контактов: %d</string>
 </resources>

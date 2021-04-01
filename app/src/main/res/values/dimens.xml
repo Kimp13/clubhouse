@@ -5,4 +5,6 @@
     <dimen name="cardListPadding">@dimen/cardHorizontalMargin</dimen>
     <dimen name="cardPadding">@dimen/cardHorizontalMargin</dimen>
     <dimen name="cardVerticalMargin">10dp</dimen>
+    <dimen name="cardBorderWidth">1dp</dimen>
+    <dimen name="cardBorderRadius">10dp</dimen>
 </resources>
