@@ -23,7 +23,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ui.services.ContactService" />
         <service android:name=".ui.services.BirthdayNotificationService" />
         <service android:name=".ui.services.RebootReminderService" />
 

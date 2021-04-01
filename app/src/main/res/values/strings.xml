@@ -39,4 +39,5 @@
         We really need the permission to read your contacts. Without it, our app is pointless!
     </string>
     <string name="permit">Permit</string>
+    <string name="refresh">Refresh</string>
 </resources>

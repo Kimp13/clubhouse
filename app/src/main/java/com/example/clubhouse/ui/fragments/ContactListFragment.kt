@@ -2,25 +2,28 @@ package com.example.clubhouse.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.clubhouse.R
-import com.example.clubhouse.data.DataSource
+import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.data.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
-import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
+import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
+import com.example.clubhouse.ui.viewmodels.ContactListViewModel
 
 const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
 class ContactListFragment :
-    ContactFragment(R.layout.fragment_contact_list),
-    ContactServiceConsumer {
+    Fragment(R.layout.fragment_contact_list) {
     private var binding: FragmentContactListBinding? = null
     private var cardClickListener: ContactCardClickListener? = null
     private var contact: SimpleContactEntity? = null
+    private val viewModel: ContactListViewModel by viewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -46,15 +49,23 @@ class ContactListFragment :
             }
         }
 
-        savedInstanceState?.getParcelable<SimpleContactEntity>(CONTACT_ENTITY_KEY)?.let {
-            updateContact(it)
-        } ?: updateUI()
+        setHasOptionsMenu(true)
+        initializeRefreshView()
+        updateUI()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(CONTACT_ENTITY_KEY, contact)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
 
-        super.onSaveInstanceState(outState)
+        inflater.inflate(R.menu.fragment_contact_list_menu, menu)
+        menu.findItem(R.id.menuRefresh)?.run {
+            setOnMenuItemClickListener {
+                binding?.contactListRefreshView?.isRefreshing = true
+                refreshContactList()
+
+                true
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -69,19 +80,14 @@ class ContactListFragment :
         super.onDetach()
     }
 
-    override fun onServiceBoundListener() {
-        serviceBound = true
-
-        updateUI()
-    }
-
     private fun updateContact(contact: SimpleContactEntity) {
         this.contact = contact
 
         binding?.contactCard?.run {
+            println(this)
             contact.photoId?.let {
                 contactCardPhoto.run {
-                    setImageURI(DataSource.makePhotoUri(it))
+                    setImageURI(ContactRepository.makePhotoUri(it))
 
                     imageTintList = null
                 }
@@ -96,19 +102,35 @@ class ContactListFragment :
         }
     }
 
-    override fun updateUI() {
-        if (serviceBound && permissionGranted) {
-            serviceOwner?.getService()?.let { service ->
-                launch {
-                    try {
-                        service.getSimpleContacts().firstOrNull()?.let {
-                            updateContact(it)
-                        }
-                    } catch (e: CancellationException) {
-                        println("Interrupted")
-                    }
-                }
+    private fun updateContactList(list: List<SimpleContactEntity>) {
+        list.firstOrNull()?.let {
+            updateContact(it)
+        }
+    }
+
+    private fun updateUI() {
+        viewModel.contactList.observe(viewLifecycleOwner) {
+            updateContactList(it)
+
+            binding?.contactListRefreshView?.isRefreshing = false
+        }
+
+        (activity as? ReadContactsPermissionRequester)?.run {
+            requestPermission {
+                viewModel.search()
             }
+        }
+    }
+
+    private fun refreshContactList() {
+        viewModel.refreshContactList()
+
+        binding?.contactListRefreshView?.isRefreshing
+    }
+
+    private fun initializeRefreshView() {
+        binding?.contactListRefreshView?.setOnRefreshListener {
+            refreshContactList()
         }
     }
 }
