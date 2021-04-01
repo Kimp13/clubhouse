@@ -51,7 +51,7 @@ class RequestReadContactsPermissionFragment : Fragment(
     override fun onStart() {
         super.onStart()
 
-        if (permissionRequester?.checkPermission() == true) {
+        if (permissionRequester?.checkContactPermission() == true) {
             backStackOwner?.popBackStack()
         }
     }

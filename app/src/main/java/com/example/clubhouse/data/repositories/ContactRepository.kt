@@ -1,16 +1,21 @@
-package com.example.clubhouse.data
+package com.example.clubhouse.data.repositories
 
 import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
 import android.provider.ContactsContract
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import com.example.clubhouse.data.daos.ContactLocationDao
+import com.example.clubhouse.data.entities.ContactEntity
+import com.example.clubhouse.data.entities.SimpleContactEntity
+import com.example.clubhouse.data.helpers.BirthDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val SELECTION = "${ContactsContract.Data.LOOKUP_KEY} = ?"
 private val CONTACT_PROJECTION = arrayOf(
@@ -49,13 +54,10 @@ private const val DATA_FIELD_INDEX = 2
 private const val DATA_ADDITIONAL_FIELD_INDEX = 3
 private const val DATA_PHOTO_ID_INDEX = 4
 
-object ContactRepository {
-    fun makePhotoUri(photoId: Long) =
-        ContentUris.withAppendedId(
-            ContactsContract.DisplayPhoto.CONTENT_URI,
-            photoId
-        )
-
+@Singleton
+class ContactRepository @Inject constructor(
+    private val contactLocationDao: ContactLocationDao
+) {
     suspend fun getSimpleContacts(
         context: Context,
         query: String?
@@ -144,6 +146,8 @@ object ContactRepository {
                 var photoId: Long? = null
                 val emails = mutableListOf<String>()
                 val phones = mutableListOf<String>()
+
+                val location = contactLocationDao.findById(id)
 
                 resolver.query(
                     ContactsContract.Data.CONTENT_URI,
@@ -247,11 +251,12 @@ object ContactRepository {
                     id,
                     lookup,
                     name,
-                    phones,
-                    emails,
                     description,
                     birthDate,
-                    photoId
+                    photoId,
+                    location,
+                    phones,
+                    emails
                 )
             }
         }

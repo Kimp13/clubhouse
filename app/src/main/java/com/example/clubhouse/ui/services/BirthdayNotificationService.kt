@@ -7,8 +7,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.ContactRepository
+import com.example.clubhouse.data.entities.ContactEntity
 import com.example.clubhouse.ui.activities.MainActivity
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
@@ -19,7 +18,13 @@ import timber.log.Timber
 private const val FOREGROUND_NOTIFICATION_ID = -0b1011010
 
 class BirthdayNotificationService : StartedContactService() {
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
+        super.onStartCommand(intent, flags, startId)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             initializeForeground()
         }
@@ -28,7 +33,7 @@ class BirthdayNotificationService : StartedContactService() {
             if (checkReadContactsPermission()) {
                 launch {
                     try {
-                        ContactRepository.getContact(
+                        repository.getContact(
                             this@BirthdayNotificationService,
                             lookup
                         )?.let { contact ->

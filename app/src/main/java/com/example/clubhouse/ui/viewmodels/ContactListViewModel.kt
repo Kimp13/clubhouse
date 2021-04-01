@@ -5,14 +5,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.clubhouse.data.ContactRepository
-import com.example.clubhouse.data.SimpleContactEntity
+import com.example.clubhouse.ContactApplication
+import com.example.clubhouse.data.entities.SimpleContactEntity
+import com.example.clubhouse.data.repositories.ContactRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class ContactListViewModel(application: Application) :
-    AndroidViewModel(application) {
+class ContactListViewModel(
+    application: Application
+) : AndroidViewModel(application) {
     val error: LiveData<Unit>
         get() = mutableError
 
@@ -22,9 +25,19 @@ class ContactListViewModel(application: Application) :
     var searchQuery: String? = null
         private set
 
+    @Inject
+    lateinit var repository: ContactRepository
+
     private val mutableError = MutableLiveData<Unit>()
     private val mutableContactList =
         MutableLiveData<List<SimpleContactEntity>>()
+
+    init {
+        (application as? ContactApplication)?.applicationComponent
+            ?.contactViewModelComponent()
+            ?.create()
+            ?.inject(this)
+    }
 
     fun provideContactList(query: String? = null) {
         if (query == null) {
@@ -41,7 +54,7 @@ class ContactListViewModel(application: Application) :
     fun refreshContactList(query: String? = searchQuery) {
         viewModelScope.launch {
             try {
-                ContactRepository.getSimpleContacts(
+                repository.getSimpleContacts(
                     getApplication(),
                     query
                 )?.let {

@@ -1,38 +1,43 @@
 package com.example.clubhouse.ui.fragments
 
+import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.ContactRepository
+import com.example.clubhouse.data.entities.ContactEntity
 import com.example.clubhouse.databinding.FragmentContactDetailsBinding
+import com.example.clubhouse.ui.delegates.ContactPhotoDelegate
 import com.example.clubhouse.ui.delegates.ReminderDelegate
+import com.example.clubhouse.ui.interfaces.ContactLocationRetriever
 import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
 import com.example.clubhouse.ui.viewmodels.ContactDetailsViewModel
 
 const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
 const val CONTACT_ARG_LOOKUP_KEY = "argument_lookup_key"
 
-class ContactDetailsFragment :
-    Fragment(R.layout.fragment_contact_details) {
+class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     companion object {
-        fun newInstance(lookup: String) = ContactDetailsFragment().apply {
-            arguments = Bundle().apply {
-                putString(CONTACT_ARG_LOOKUP_KEY, lookup)
+        fun newInstance(lookup: String) =
+            ContactDetailsFragment().apply {
+                arguments = Bundle().apply {
+                    putString(CONTACT_ARG_LOOKUP_KEY, lookup)
+                }
             }
-        }
     }
 
     private val viewModel: ContactDetailsViewModel by viewModels()
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
+    private var locationRetriever: ContactLocationRetriever? = null
     private var isReminded: Boolean = false
         set(value) {
             field = value
@@ -56,6 +61,14 @@ class ContactDetailsFragment :
 
             return false
         }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is ContactLocationRetriever) {
+            locationRetriever = context
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -90,8 +103,14 @@ class ContactDetailsFragment :
         super.onDestroyView()
     }
 
+    override fun onDetach() {
+        locationRetriever = null
+
+        super.onDetach()
+    }
+
     private fun updateContact(contact: ContactEntity) {
-        this.contactEntity = contact
+        contactEntity = contact
 
         binding?.run {
             if (!contactDetailsRefreshView.isEnabled) {
@@ -101,11 +120,20 @@ class ContactDetailsFragment :
                 )
             }
 
-            contact.photoId?.let {
-                contactDetailsPhoto.run {
-                    setImageURI(ContactRepository.makePhotoUri(it))
-                    visibility = View.VISIBLE
+            contactDetailsPhoto.run {
+                visibility = View.VISIBLE
+
+                contact.photoId?.let {
+                    setImageURI(ContactPhotoDelegate.makePhotoUri(it))
                     imageTintList = null
+                } ?: run {
+                    setImageResource(R.drawable.ic_baseline_person_24)
+                    imageTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(
+                            context,
+                            R.color.colorPrimary
+                        )
+                    )
                 }
             }
 
@@ -117,7 +145,7 @@ class ContactDetailsFragment :
                 contact.description ?: getString(R.string.no_description)
             contactDetailsDescription.visibility = View.VISIBLE
 
-            val phonesIterator = contact.phoneNumbers.listIterator()
+            val phonesIterator = contact.phones.listIterator()
             val emailsIterator = contact.emails.listIterator()
 
             listOf(
@@ -127,6 +155,8 @@ class ContactDetailsFragment :
                 if (phonesIterator.hasNext()) {
                     it.text = phonesIterator.next()
                     it.visibility = View.VISIBLE
+                } else {
+                    it.visibility = View.GONE
                 }
             }
 
@@ -137,6 +167,8 @@ class ContactDetailsFragment :
                 if (emailsIterator.hasNext()) {
                     it.text = emailsIterator.next()
                     it.visibility = View.VISIBLE
+                } else {
+                    it.visibility = View.GONE
                 }
             }
 
@@ -162,6 +194,30 @@ class ContactDetailsFragment :
                                 DateUtils.FORMAT_NO_YEAR
                     )
                 )
+            } ?: run {
+                contactDetailsBirthDate.visibility = View.GONE
+                contactDetailsRemindTextView.visibility = View.GONE
+                contactDetailsRemindSwitch.visibility = View.GONE
+            }
+
+            contactDetailsLocationTextView.visibility = View.VISIBLE
+            contactDetailsLocationButton.visibility = View.VISIBLE
+            contactDetailsLocationButton.setOnClickListener {
+                locationRetriever?.retrieveContactLocation(contact)
+            }
+
+            contact.location?.run {
+                contactDetailsLocationTextView.text = description ?: getString(
+                    R.string.location_fmt,
+                    latitude,
+                    longitude
+                )
+                contactDetailsLocationButton.text = getString(R.string.change)
+            } ?: run {
+                contactDetailsLocationTextView.text = getString(
+                    R.string.no_location_set
+                )
+                contactDetailsLocationButton.text = getString(R.string.set)
             }
         }
     }
@@ -182,7 +238,7 @@ class ContactDetailsFragment :
 
         (activity as? ReadContactsPermissionRequester)?.run {
             arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
-                requestPermission {
+                requestContactPermission {
                     viewModel.setContactLookup(lookup)
                 }
             }

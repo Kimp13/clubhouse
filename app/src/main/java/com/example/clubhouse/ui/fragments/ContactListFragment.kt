@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.clubhouse.R
-import com.example.clubhouse.data.SimpleContactEntity
+import com.example.clubhouse.data.entities.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
 import com.example.clubhouse.ui.adapters.ContactAdapter
 import com.example.clubhouse.ui.adapters.decorations.ContactListDecoration
@@ -24,13 +24,12 @@ import com.example.clubhouse.ui.viewmodels.ContactListViewModel
 
 const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
-class ContactListFragment :
-    Fragment(R.layout.fragment_contact_list) {
+class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     private var cardClickListener: ContactCardClickListener? = null
     private var viewAdapter: ContactAdapter? = null
     private var binding: FragmentContactListBinding? = null
-    private val viewModel: ContactListViewModel by viewModels()
     private lateinit var recyclerViewDecoration: ContactListDecoration
+    private val viewModel: ContactListViewModel by viewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -111,6 +110,7 @@ class ContactListFragment :
 
     override fun onDestroyView() {
         viewAdapter = null
+        binding = null
 
         super.onDestroyView()
     }
@@ -161,7 +161,7 @@ class ContactListFragment :
         }
 
         (activity as? ReadContactsPermissionRequester)?.run {
-            requestPermission {
+            requestContactPermission {
                 if (viewModel.contactList.value == null) {
                     viewAdapter?.items = listOf(ContactListItem.Progress)
                 }

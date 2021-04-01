@@ -5,23 +5,35 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.ContactRepository
+import com.example.clubhouse.ContactApplication
+import com.example.clubhouse.data.entities.ContactEntity
+import com.example.clubhouse.data.repositories.ContactRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
-class ContactDetailsViewModel(application: Application) : AndroidViewModel(
-    application
-) {
+class ContactDetailsViewModel(
+    application: Application
+) : AndroidViewModel(application) {
     val error: LiveData<Unit>
         get() = mutableError
 
     val contact: LiveData<ContactEntity>
         get() = mutableContact
 
+    @Inject
+    lateinit var repository: ContactRepository
+
     private val mutableError = MutableLiveData<Unit>()
     private val mutableContact = MutableLiveData<ContactEntity>()
+
+    init {
+        (application as? ContactApplication)?.applicationComponent
+            ?.contactViewModelComponent()
+            ?.create()
+            ?.inject(this)
+    }
 
     fun setContactLookup(lookup: String) {
         if (mutableContact.value != null) {
@@ -34,7 +46,7 @@ class ContactDetailsViewModel(application: Application) : AndroidViewModel(
     fun refreshContactDetails(lookup: String) {
         viewModelScope.launch {
             try {
-                ContactRepository.getContact(getApplication(), lookup)?.let {
+                repository.getContact(getApplication(), lookup)?.let {
                     mutableContact.postValue(it)
                 } ?: mutableError.postValue(Unit)
             } catch (e: CancellationException) {

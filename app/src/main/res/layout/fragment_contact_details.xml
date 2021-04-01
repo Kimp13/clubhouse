@@ -6,115 +6,145 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/contactDetailsContents"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/cardPadding">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/contactDetailsErrorGroup"
-            style="@style/ContactDetailsGroup"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <include layout="@layout/error_group" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/contactDetailsProgressGroup"
-            style="@style/ContactDetailsGroup"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <include layout="@layout/progress_group" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/contactDetailsPhoto"
-            android:layout_width="@dimen/cardImageViewSide"
-            android:layout_height="@dimen/cardImageViewSide"
-            android:contentDescription="@string/photo"
-            android:src="@drawable/ic_baseline_person_24"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/colorPrimary" />
-
-        <TextView
-            android:id="@+id/contactDetailsName"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/cardImageViewSide"
-            android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
-            android:gravity="center_vertical"
-            android:text="@string/name"
-            android:visibility="visible"
-            app:layout_constraintStart_toEndOf="@id/contactDetailsPhoto"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/contactDetailsPhone1"
-            style="@style/ContactDetailsListItem"
-            android:text="@string/phone"
-            android:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsPhoto" />
-
-        <TextView
-            android:id="@+id/contactDetailsPhone2"
-            style="@style/ContactDetailsListItem"
-            android:text="@string/phone_2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsPhone1" />
-
-        <TextView
-            android:id="@+id/contactDetailsEmail1"
-            style="@style/ContactDetailsListItem"
-            android:text="@string/email"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsPhone2" />
-
-        <TextView
-            android:id="@+id/contactDetailsEmail2"
-            style="@style/ContactDetailsListItem"
-            android:text="@string/email_2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail1" />
-
-        <TextView
-            android:id="@+id/contactDetailsBirthDate"
-            style="@style/ContactDetailsListItem"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail2" />
-
-        <TextView
-            android:id="@+id/contactDetailsDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/cardImageViewSide"
-            android:gravity="center_vertical"
-            android:text="@string/description"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsBirthDate" />
-
-        <TextView
-            android:id="@+id/contactDetailsRemindTextView"
-            style="@style/ContactDetailsListItem"
-            android:layout_marginTop="@dimen/cardListPadding"
-            android:text="@string/remind_about_birthday"
-            android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@id/contactDetailsRemindSwitch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsDescription" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/contactDetailsRemindSwitch"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contactDetailsContents"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/contactDetailsRemindTextView"
-            app:layout_constraintTop_toBottomOf="@id/contactDetailsDescription" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:padding="@dimen/cardPadding">
+
+            <LinearLayout
+                android:id="@+id/contactDetailsErrorGroup"
+                style="@style/ContactDetailsGroup"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include layout="@layout/error_group" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/contactDetailsProgressGroup"
+                style="@style/ContactDetailsGroup"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <include layout="@layout/progress_group" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/contactDetailsPhoto"
+                android:layout_width="@dimen/cardImageViewSide"
+                android:layout_height="@dimen/cardImageViewSide"
+                android:contentDescription="@string/photo"
+                android:src="@drawable/ic_baseline_person_24"
+                android:visibility="visible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/colorPrimary" />
+
+            <TextView
+                android:id="@+id/contactDetailsName"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/cardImageViewSide"
+                android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
+                android:gravity="center_vertical"
+                android:text="@string/name"
+                android:visibility="visible"
+                app:layout_constraintStart_toEndOf="@id/contactDetailsPhoto"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/contactDetailsPhone1"
+                style="@style/ContactDetailsListItem"
+                android:text="@string/phone"
+                android:visibility="visible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsPhoto" />
+
+            <TextView
+                android:id="@+id/contactDetailsPhone2"
+                style="@style/ContactDetailsListItem"
+                android:text="@string/phone_2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsPhone1" />
+
+            <TextView
+                android:id="@+id/contactDetailsEmail1"
+                style="@style/ContactDetailsListItem"
+                android:text="@string/email"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsPhone2" />
+
+            <TextView
+                android:id="@+id/contactDetailsEmail2"
+                style="@style/ContactDetailsListItem"
+                android:text="@string/email_2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail1" />
+
+            <TextView
+                android:id="@+id/contactDetailsBirthDate"
+                style="@style/ContactDetailsListItem"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsEmail2" />
+
+            <TextView
+                android:id="@+id/contactDetailsDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/cardImageViewSide"
+                android:gravity="center_vertical"
+                android:text="@string/description"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsBirthDate" />
+
+            <TextView
+                android:id="@+id/contactDetailsRemindTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/remind_about_birthday"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/contactDetailsRemindSwitch"
+                app:layout_constraintEnd_toStartOf="@id/contactDetailsRemindSwitch"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/contactDetailsRemindSwitch" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/contactDetailsRemindSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/contactDetailsRemindTextView"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsDescription" />
+
+            <com.example.clubhouse.ui.views.EllipsizedTextView
+                android:id="@+id/contactDetailsLocationTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/contactDetailsLocationButton"
+                app:layout_constraintEnd_toStartOf="@id/contactDetailsLocationButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/contactDetailsLocationButton" />
+
+            <Button
+                android:id="@+id/contactDetailsLocationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/cardInnerGap"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/contactDetailsLocationTextView"
+                app:layout_constraintTop_toBottomOf="@id/contactDetailsRemindSwitch" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
