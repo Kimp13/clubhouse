@@ -4,14 +4,9 @@ import android.Manifest
 import android.app.ActionBar
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -26,12 +21,9 @@ import com.example.clubhouse.ui.fragments.REQUEST_READ_CONTACTS_PERMISSION_FRAGM
 import com.example.clubhouse.ui.fragments.RequestPermissionDialogFragment
 import com.example.clubhouse.ui.fragments.RequestReadContactsPermissionFragment
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
-import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
-import com.example.clubhouse.ui.interfaces.ContactServiceOwner
 import com.example.clubhouse.ui.interfaces.PoppableBackStackOwner
 import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
 import com.example.clubhouse.ui.interfaces.RequestPermissionDialogDismissListener
-import com.example.clubhouse.ui.services.ContactService
 import kotlin.properties.Delegates
 
 private const val FRAGMENT_TAG_KEY = "fragment_tag"
@@ -39,12 +31,9 @@ private const val FRAGMENT_TAG_KEY = "fragment_tag"
 class MainActivity :
     AppCompatActivity(),
     ContactCardClickListener,
-    ContactServiceOwner,
     PoppableBackStackOwner,
     ReadContactsPermissionRequester,
     RequestPermissionDialogDismissListener {
-    private var bound = false
-    private lateinit var contactService: ContactService
     private var currentFragmentTag: String by Delegates.notNull()
     private var requestSuccessCallback: (() -> Unit)? = null
     private var requestPermissionLauncher = registerForActivityResult(
@@ -77,33 +66,10 @@ class MainActivity :
         }
     }
 
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, iBinder: IBinder) {
-            bound = true
-            contactService = (iBinder as ContactService.ContactBinder).getService()
-
-            supportFragmentManager.findFragmentByTag(currentFragmentTag)?.let {
-                if (it is ContactServiceConsumer) {
-                    it.onServiceBoundListener()
-                }
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            bound = false
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         createNotificationChannel()
-
-        bindService(
-            Intent(this, ContactService::class.java),
-            connection,
-            Context.BIND_AUTO_CREATE
-        )
 
         currentFragmentTag = savedInstanceState?.getString(FRAGMENT_TAG_KEY)
             ?: run {
@@ -130,16 +96,6 @@ class MainActivity :
         outState.putString(FRAGMENT_TAG_KEY, currentFragmentTag)
 
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onDestroy() {
-        if (bound) {
-            unbindService(connection)
-
-            bound = false
-        }
-
-        super.onDestroy()
     }
 
     override fun onBackPressed() {
@@ -179,13 +135,6 @@ class MainActivity :
         supportFragmentManager.popBackStack()
     }
 
-    override fun getService(): ContactService? =
-        if (bound) {
-            contactService
-        } else {
-            null
-        }
-
     override fun checkPermission() = ContextCompat.checkSelfPermission(
         this,
         Manifest.permission.READ_CONTACTS
@@ -221,6 +170,4 @@ class MainActivity :
                     })
         }
     }
-
-
 }

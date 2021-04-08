@@ -29,4 +29,5 @@
     <string name="ok">ОК</string>
     <string name="no_name">Нет имени</string>
     <string name="no_description">Нет описания</string>
+    <string name="refresh">Обновить</string>
 </resources>

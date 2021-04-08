@@ -8,7 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.DataSource
+import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.ui.activities.MainActivity
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
@@ -28,16 +28,16 @@ class BirthdayNotificationService : StartedContactService() {
             if (checkReadContactsPermission()) {
                 launch {
                     try {
-                        val contact = DataSource.getContact(
-                            contentResolver,
-                            lookup
-                        )
-
-                        showBirthdayNotification(contact)
-                        ReminderDelegate.setReminder(
+                        ContactRepository.getContact(
                             this@BirthdayNotificationService,
-                            contact
-                        )
+                            lookup
+                        )?.let { contact ->
+                            showBirthdayNotification(contact)
+                            ReminderDelegate.setReminder(
+                                this@BirthdayNotificationService,
+                                contact
+                            )
+                        }
                     } catch (e: CancellationException) {
                         Timber.d("Service job cancelled\n$e")
                     } finally {

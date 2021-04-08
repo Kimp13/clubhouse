@@ -5,7 +5,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.clubhouse.R
-import com.example.clubhouse.data.DataSource
+import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.ui.delegates.CONTACT_LOOKUPS_ARRAY_KEY
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import kotlinx.coroutines.CancellationException
@@ -24,8 +24,8 @@ class RebootReminderService : StartedContactService() {
             if (checkReadContactsPermission()) {
                 launch {
                     try {
-                        DataSource.getContacts(
-                            contentResolver,
+                        ContactRepository.getContacts(
+                            this@RebootReminderService,
                             lookups
                         ).forEach {
                             ReminderDelegate.setReminder(

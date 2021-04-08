@@ -2,26 +2,25 @@ package com.example.clubhouse.ui.fragments
 
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.DataSource
+import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.databinding.FragmentContactDetailsBinding
 import com.example.clubhouse.ui.delegates.ReminderDelegate
-import com.example.clubhouse.ui.interfaces.ContactEntityOwner
-import com.example.clubhouse.ui.interfaces.ContactServiceConsumer
-import kotlinx.coroutines.launch
-import kotlin.coroutines.cancellation.CancellationException
+import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
+import com.example.clubhouse.ui.viewmodels.ContactDetailsViewModel
 
 const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
-const val CONTACT_ENTITY_KEY = "contact_entity"
 const val CONTACT_ARG_LOOKUP_KEY = "argument_lookup_key"
 
 class ContactDetailsFragment :
-    ContactFragment(R.layout.fragment_contact_details),
-    ContactServiceConsumer,
-    ContactEntityOwner {
+    Fragment(R.layout.fragment_contact_details) {
     companion object {
         fun newInstance(lookup: String) = ContactDetailsFragment().apply {
             arguments = Bundle().apply {
@@ -30,6 +29,7 @@ class ContactDetailsFragment :
         }
     }
 
+    private val viewModel: ContactDetailsViewModel by viewModels()
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
     private var isReminded: Boolean = false
@@ -66,15 +66,21 @@ class ContactDetailsFragment :
 
         binding = FragmentContactDetailsBinding.bind(view)
 
-        savedInstanceState?.getParcelable<ContactEntity>(CONTACT_ENTITY_KEY)?.let {
-            updateContact(it)
-        } ?: updateUI()
+        initializeRefreshView()
+        setHasOptionsMenu(true)
+        updateUI()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(CONTACT_ENTITY_KEY, contactEntity)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
 
-        super.onSaveInstanceState(outState)
+        inflater.inflate(R.menu.fragment_contact_details_menu, menu)
+        menu.findItem(R.id.menuRefresh).setOnMenuItemClickListener {
+            binding?.contactDetailsRefreshView?.isRefreshing = true
+            refreshContactDetails()
+
+            true
+        }
     }
 
     override fun onDestroyView() {
@@ -83,27 +89,20 @@ class ContactDetailsFragment :
         super.onDestroyView()
     }
 
-    override fun onServiceBoundListener() {
-        serviceBound = true
-
-        updateUI()
-    }
-
-    override fun getContact() = contactEntity
-
     private fun updateContact(contact: ContactEntity) {
         this.contactEntity = contact
 
         binding?.run {
             contact.photoId?.let {
                 contactDetailsPhoto.run {
-                    setImageURI(DataSource.makePhotoUri(it))
+                    setImageURI(ContactRepository.makePhotoUri(it))
 
                     imageTintList = null
                 }
             }
 
-            contactDetailsName.text = contact.name ?: getString(R.string.no_name)
+            contactDetailsName.text =
+                contact.name ?: getString(R.string.no_name)
             contactDetailsDescription.text =
                 contact.description ?: getString(R.string.no_description)
 
@@ -156,19 +155,31 @@ class ContactDetailsFragment :
         }
     }
 
-    override fun updateUI() {
-        if (serviceBound && permissionGranted) {
-            serviceOwner?.getService()?.let { service ->
-                launch {
-                    try {
-                        arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let {
-                            updateContact(service.getContact(it))
-                        }
-                    } catch (e: CancellationException) {
-                        println("Interrupted")
-                    }
+    private fun updateUI() {
+        viewModel.contact.observe(viewLifecycleOwner) { contact ->
+            updateContact(contact)
+
+            binding?.contactDetailsRefreshView?.isRefreshing = false
+        }
+
+        (activity as? ReadContactsPermissionRequester)?.run {
+            arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
+                requestPermission {
+                    viewModel.setContactLookup(lookup)
                 }
             }
+        }
+    }
+
+    private fun refreshContactDetails() {
+        arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
+            viewModel.refreshContactDetails(lookup)
+        }
+    }
+
+    private fun initializeRefreshView() {
+        binding?.contactDetailsRefreshView?.setOnRefreshListener {
+            refreshContactDetails()
         }
     }
 }
