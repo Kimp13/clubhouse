@@ -15,8 +15,9 @@ import com.example.clubhouse.R
 import com.example.clubhouse.data.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
 import com.example.clubhouse.ui.adapters.ContactAdapter
-import com.example.clubhouse.ui.decorations.ContactListDecoration
-import com.example.clubhouse.ui.decorations.ContactListDecorationProperties
+import com.example.clubhouse.ui.adapters.Item
+import com.example.clubhouse.ui.adapters.decorations.ContactListDecoration
+import com.example.clubhouse.ui.adapters.decorations.ContactListDecorationProperties
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
 import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
 import com.example.clubhouse.ui.viewmodels.ContactListViewModel
@@ -102,7 +103,11 @@ class ContactListFragment :
     }
 
     private fun updateContactList(list: List<SimpleContactEntity>) {
-        viewAdapter?.setContactList(list)
+        viewAdapter?.items = listOf(Item.HeaderItem).plus(list.toItems()).plus(listOf(Item.FooterItem(list.size)))
+    }
+
+    private fun List<SimpleContactEntity>.toItems() = map {
+        Item.ContactItem(it)
     }
 
     private fun initializeRecyclerView() {

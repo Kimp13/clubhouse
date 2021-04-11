@@ -1,4 +1,4 @@
-package com.example.clubhouse.ui.decorations
+package com.example.clubhouse.ui.adapters.decorations
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -21,6 +21,12 @@ data class ContactListDecorationProperties(
 class ContactListDecoration(
     private val props: ContactListDecorationProperties
 ) : RecyclerView.ItemDecoration() {
+    private val paint = Paint().apply {
+        color = props.junctionColor
+        strokeWidth = props.junctionWidth
+        style = Paint.Style.STROKE
+    }
+
     override fun getItemOffsets(
         outRect: Rect,
         view: View,
@@ -42,11 +48,6 @@ class ContactListDecoration(
         state: RecyclerView.State
     ) {
         val path = Path()
-        val paint = Paint().apply {
-            color = props.junctionColor
-            strokeWidth = props.junctionWidth
-            style = Paint.Style.STROKE
-        }
 
         parent.children.forEachIndexed { index, view ->
             if (index < parent.childCount - 1) {
