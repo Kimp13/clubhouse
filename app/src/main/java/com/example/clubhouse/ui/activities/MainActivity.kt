@@ -11,6 +11,7 @@ import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.clubhouse.R
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.clubhouse.ui.fragments.CONTACT_DETAILS_FRAGMENT_TAG
@@ -51,17 +52,11 @@ class MainActivity :
                     null
                 )
             } else {
-                currentFragmentTag = REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG
-
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(
-                        R.id.mainActivityRootLayout,
-                        RequestReadContactsPermissionFragment(),
-                        currentFragmentTag
-                    )
-                    .addToBackStack(null)
-                    .commit()
+                changeFragment(
+                    RequestReadContactsPermissionFragment(),
+                    REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG,
+                    true
+                )
             }
         }
     }
@@ -71,23 +66,11 @@ class MainActivity :
         setContentView(R.layout.activity_main)
         createNotificationChannel()
 
-        currentFragmentTag = savedInstanceState?.getString(FRAGMENT_TAG_KEY)
-            ?: run {
-                supportFragmentManager
-                    .beginTransaction()
-                    .add(
-                        R.id.mainActivityRootLayout,
-                        ContactListFragment(),
-                        CONTACT_LIST_FRAGMENT_TAG
-                    )
-                    .commit()
+        savedInstanceState?.getString(FRAGMENT_TAG_KEY)?.let {
+            currentFragmentTag = it
+        } ?: changeFragment(ContactListFragment(), CONTACT_LIST_FRAGMENT_TAG)
 
-                CONTACT_LIST_FRAGMENT_TAG
-            }
-
-        intent?.getStringExtra(
-            CONTACT_ARG_LOOKUP_KEY
-        )?.let {
+        intent?.getStringExtra(CONTACT_ARG_LOOKUP_KEY)?.let {
             onCardClick(it)
         }
     }
@@ -109,26 +92,22 @@ class MainActivity :
         finish()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        android.R.id.home -> {
-            onBackPressed()
-            true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
-        else -> super.onOptionsItemSelected(item)
-    }
 
     override fun onCardClick(lookup: String) {
-        currentFragmentTag = CONTACT_DETAILS_FRAGMENT_TAG
-
-        supportFragmentManager
-            .beginTransaction()
-            .replace(
-                R.id.mainActivityRootLayout,
-                ContactDetailsFragment.newInstance(lookup),
-                CONTACT_DETAILS_FRAGMENT_TAG
-            )
-            .addToBackStack(null)
-            .commit()
+        changeFragment(
+            ContactDetailsFragment.newInstance(lookup),
+            CONTACT_DETAILS_FRAGMENT_TAG,
+            true
+        )
     }
 
     override fun popBackStack() {
@@ -166,8 +145,32 @@ class MainActivity :
                         getString(R.string.birthday_channel_name),
                         NotificationManager.IMPORTANCE_DEFAULT
                     ).apply {
-                        description = getString(R.string.birthday_channel_description)
+                        description =
+                            getString(R.string.birthday_channel_description)
                     })
         }
+    }
+
+    private fun changeFragment(
+        fragment: Fragment,
+        tag: String,
+        addToBackStack: Boolean = false
+    ) {
+        currentFragmentTag = tag
+
+        supportFragmentManager.beginTransaction()
+            .apply {
+                replace(
+                    R.id.mainActivityFragmentLayout,
+                    fragment,
+                    tag
+                )
+
+                if (addToBackStack) {
+                    addToBackStack(null)
+                }
+
+                commit()
+            }
     }
 }

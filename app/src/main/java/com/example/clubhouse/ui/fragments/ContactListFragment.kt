@@ -6,12 +6,18 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.data.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
+import com.example.clubhouse.ui.adapters.ContactAdapter
+import com.example.clubhouse.ui.adapters.decorations.ContactListDecoration
+import com.example.clubhouse.ui.adapters.decorations.ContactListDecorationProperties
+import com.example.clubhouse.ui.adapters.items.ContactListItem
 import com.example.clubhouse.ui.interfaces.ContactCardClickListener
 import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
 import com.example.clubhouse.ui.viewmodels.ContactListViewModel
@@ -20,10 +26,11 @@ const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
 class ContactListFragment :
     Fragment(R.layout.fragment_contact_list) {
-    private var binding: FragmentContactListBinding? = null
     private var cardClickListener: ContactCardClickListener? = null
-    private var contact: SimpleContactEntity? = null
+    private var viewAdapter: ContactAdapter? = null
+    private var binding: FragmentContactListBinding? = null
     private val viewModel: ContactListViewModel by viewModels()
+    private lateinit var recyclerViewDecoration: ContactListDecoration
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -31,6 +38,24 @@ class ContactListFragment :
         if (context is ContactCardClickListener) {
             cardClickListener = context
         }
+
+        recyclerViewDecoration = ContactListDecoration(
+            ContactListDecorationProperties(
+                verticalOffset = resources.getDimensionPixelSize(
+                    R.dimen.cardVerticalMargin
+                ),
+                horizontalOffset = resources.getDimensionPixelSize(
+                    R.dimen.cardHorizontalMargin
+                ),
+                junctionColor = ContextCompat.getColor(
+                    context,
+                    R.color.colorPrimary
+                ),
+                junctionWidth = resources.getDimensionPixelSize(
+                    R.dimen.cardBorderWidth
+                ).toFloat()
+            )
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,15 +66,10 @@ class ContactListFragment :
             setTitle(R.string.contact_list)
         }
 
-        binding = FragmentContactListBinding.bind(view).apply {
-            contactCard.root.setOnClickListener {
-                contact?.lookup?.let { lookup ->
-                    cardClickListener?.onCardClick(lookup)
-                }
-            }
-        }
+        binding = FragmentContactListBinding.bind(view)
 
         setHasOptionsMenu(true)
+        initializeRecyclerView()
         initializeRefreshView()
         updateUI()
     }
@@ -58,6 +78,7 @@ class ContactListFragment :
         super.onCreateOptionsMenu(menu, inflater)
 
         inflater.inflate(R.menu.fragment_contact_list_menu, menu)
+
         menu.findItem(R.id.menuRefresh)?.run {
             setOnMenuItemClickListener {
                 binding?.contactListRefreshView?.isRefreshing = true
@@ -66,10 +87,30 @@ class ContactListFragment :
                 true
             }
         }
+
+        (menu.findItem(R.id.contactListSearch)?.actionView
+                as? SearchView)?.run {
+            queryHint = getString(R.string.search_contacts)
+
+            if (viewModel.searchQuery?.isNotBlank() == true) {
+                setQuery(viewModel.searchQuery, false)
+                isIconified = false
+            }
+
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?) = true
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    search(newText)
+
+                    return true
+                }
+            })
+        }
     }
 
     override fun onDestroyView() {
-        binding = null
+        viewAdapter = null
 
         super.onDestroyView()
     }
@@ -80,31 +121,31 @@ class ContactListFragment :
         super.onDetach()
     }
 
-    private fun updateContact(contact: SimpleContactEntity) {
-        this.contact = contact
-
-        binding?.contactCard?.run {
-            println(this)
-            contact.photoId?.let {
-                contactCardPhoto.run {
-                    setImageURI(ContactRepository.makePhotoUri(it))
-
-                    imageTintList = null
-                }
-            }
-
-            contactCardName.text = contact.name ?: getString(
-                R.string.no_name
-            )
-            contactCardPhone.text = contact.phoneNumber ?: getString(
-                R.string.no_phone_number
-            )
-        }
+    private fun updateContactList(list: List<SimpleContactEntity>) {
+        viewAdapter?.items = listOf(
+            ContactListItem.Header
+        ) + list.map {
+            ContactListItem.Entity(it)
+        } + listOf(
+            ContactListItem.Footer(list.size)
+        )
     }
 
-    private fun updateContactList(list: List<SimpleContactEntity>) {
-        list.firstOrNull()?.let {
-            updateContact(it)
+    private fun initializeRecyclerView() {
+        binding?.contactListRecyclerView?.run {
+            viewAdapter = ContactAdapter {
+                cardClickListener?.onCardClick(it.lookup)
+            }
+
+            adapter = viewAdapter
+            layoutManager = LinearLayoutManager(
+                context,
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+
+            setHasFixedSize(true)
+            addItemDecoration(recyclerViewDecoration)
         }
     }
 
@@ -117,18 +158,29 @@ class ContactListFragment :
 
         (activity as? ReadContactsPermissionRequester)?.run {
             requestPermission {
-                viewModel.search()
+                viewModel.contactList.observe(viewLifecycleOwner) {
+                    updateContactList(it)
+                }
+
+                viewModel.provideContactList()
             }
         }
+    }
+
+    private fun search(query: String?) {
+        viewModel.provideContactList(query)
     }
 
     private fun refreshContactList() {
         viewModel.refreshContactList()
 
-        binding?.contactListRefreshView?.isRefreshing
+        binding?.contactListRefreshView?.isRefreshing = true
     }
 
     private fun initializeRefreshView() {
+        binding?.contactListRefreshView?.setColorSchemeResources(
+            R.color.colorPrimary
+        )
         binding?.contactListRefreshView?.setOnRefreshListener {
             refreshContactList()
         }
