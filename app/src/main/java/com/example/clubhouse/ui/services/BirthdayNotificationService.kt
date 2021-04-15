@@ -3,7 +3,6 @@ package com.example.clubhouse.ui.services
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.clubhouse.R
@@ -12,39 +11,43 @@ import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.ui.activities.MainActivity
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
-import timber.log.Timber
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b1011010
 
 class BirthdayNotificationService : StartedContactService() {
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int
+    ): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             initializeForeground()
         }
 
         intent?.getStringExtra(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
             if (checkReadContactsPermission()) {
-                launch {
-                    try {
-                        ContactRepository.getContact(
-                            this@BirthdayNotificationService,
-                            lookup
-                        )?.let { contact ->
-                            showBirthdayNotification(contact)
-                            ReminderDelegate.setReminder(
-                                this@BirthdayNotificationService,
-                                contact
-                            )
-                        }
-                    } catch (e: CancellationException) {
-                        Timber.d("Service job cancelled\n$e")
-                    } finally {
+                ContactRepository.getContact(
+                    this@BirthdayNotificationService,
+                    lookup
+                )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doFinally {
                         stopForeground(true)
                         stopSelf()
                     }
-                }
+                    .subscribe { contact ->
+                        showBirthdayNotification(contact)
+                        ReminderDelegate.setReminder(
+                            this@BirthdayNotificationService,
+                            contact
+                        )
+                    }
+                    .addTo(disposable)
 
                 return START_NOT_STICKY
             }
@@ -54,8 +57,6 @@ class BirthdayNotificationService : StartedContactService() {
         stopSelf()
         return START_NOT_STICKY
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun initializeForeground() {
         startForeground(

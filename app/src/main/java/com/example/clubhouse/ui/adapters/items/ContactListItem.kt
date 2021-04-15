@@ -4,6 +4,8 @@ import com.example.clubhouse.data.SimpleContactEntity
 
 sealed class ContactListItem {
     object Header : ContactListItem()
+    object Progress : ContactListItem()
+    object Error : ContactListItem()
     data class Entity(val contact: SimpleContactEntity) : ContactListItem()
     data class Footer(val count: Int) : ContactListItem()
 }

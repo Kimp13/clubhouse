@@ -2,15 +2,14 @@ package com.example.clubhouse.ui.services
 
 import android.content.Intent
 import android.os.Build
-import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.clubhouse.R
 import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.ui.delegates.CONTACT_LOOKUPS_ARRAY_KEY
 import com.example.clubhouse.ui.delegates.ReminderDelegate
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
-import timber.log.Timber
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b10010101
 
@@ -27,24 +26,25 @@ class RebootReminderService : StartedContactService() {
         intent?.extras?.getStringArrayList(CONTACT_LOOKUPS_ARRAY_KEY)
             ?.let { lookups ->
                 if (checkReadContactsPermission()) {
-                    launch {
-                        try {
-                            ContactRepository.getContacts(
-                                this@RebootReminderService,
-                                lookups
-                            ).forEach {
+                    ContactRepository.getContacts(
+                        this@RebootReminderService,
+                        lookups
+                    )
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doFinally {
+                            stopForeground(true)
+                            stopSelf()
+                        }
+                        .subscribe { contacts ->
+                            contacts.forEach {
                                 ReminderDelegate.setReminder(
                                     this@RebootReminderService,
                                     it
                                 )
                             }
-                        } catch (e: CancellationException) {
-                            Timber.d("Service job cancelled\n$e")
-                        } finally {
-                            stopForeground(true)
-                            stopSelf()
                         }
-                    }
+                        .addTo(disposable)
 
                     return START_NOT_STICKY
                 }
@@ -54,8 +54,6 @@ class RebootReminderService : StartedContactService() {
         stopSelf()
         return START_NOT_STICKY
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun initializeForeground() {
         startForeground(

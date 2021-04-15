@@ -4,8 +4,10 @@ import androidx.recyclerview.widget.DiffUtil
 import com.example.clubhouse.data.SimpleContactEntity
 import com.example.clubhouse.ui.adapters.items.ContactListItem
 import com.example.clubhouse.ui.delegates.contactEntityDelegate
+import com.example.clubhouse.ui.delegates.contactErrorDelegate
 import com.example.clubhouse.ui.delegates.contactFooterDelegate
 import com.example.clubhouse.ui.delegates.contactHeaderDelegate
+import com.example.clubhouse.ui.delegates.contactProgressDelegate
 import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 
 object ContactDiffCallback : DiffUtil.ItemCallback<ContactListItem>() {
@@ -44,6 +46,8 @@ class ContactAdapter(
 ) : AsyncListDifferDelegationAdapter<ContactListItem>(ContactDiffCallback) {
     init {
         delegatesManager.addDelegate(contactHeaderDelegate())
+        delegatesManager.addDelegate(contactProgressDelegate())
+        delegatesManager.addDelegate(contactErrorDelegate())
         delegatesManager.addDelegate(contactEntityDelegate { position ->
             (items[position] as? ContactListItem.Entity)
                 ?.let { item ->

@@ -14,6 +14,16 @@ fun contactHeaderDelegate() =
         R.layout.contact_list_header
     ) {}
 
+fun contactProgressDelegate() =
+    adapterDelegate<ContactListItem.Progress, ContactListItem>(
+        R.layout.progress_card
+    ) {}
+
+fun contactErrorDelegate() =
+    adapterDelegate<ContactListItem.Error, ContactListItem>(
+        R.layout.error_card
+    ) {}
+
 fun contactEntityDelegate(
     clickListener: (Int) -> Unit
 ) = adapterDelegate<ContactListItem.Entity, ContactListItem>(

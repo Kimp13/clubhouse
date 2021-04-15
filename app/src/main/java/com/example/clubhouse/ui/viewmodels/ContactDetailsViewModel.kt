@@ -4,20 +4,30 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.clubhouse.data.ContactEntity
 import com.example.clubhouse.data.ContactRepository
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
-import timber.log.Timber
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class ContactDetailsViewModel(application: Application) : AndroidViewModel(
     application
 ) {
+    val throwable: LiveData<Throwable>
+        get() = mutableThrowable
     val contact: LiveData<ContactEntity>
         get() = mutableContact
 
+    private val mutableThrowable = MutableLiveData<Throwable>()
     private val mutableContact = MutableLiveData<ContactEntity>()
+    private var disposable: Disposable? = null
+
+    override fun onCleared() {
+        disposable?.dispose()
+
+        super.onCleared()
+    }
 
     fun setContactLookup(lookup: String) {
         if (mutableContact.value != null) {
@@ -28,14 +38,21 @@ class ContactDetailsViewModel(application: Application) : AndroidViewModel(
     }
 
     fun refreshContactDetails(lookup: String) {
-        viewModelScope.launch {
-            try {
-                ContactRepository.getContact(getApplication(), lookup)?.let {
-                    mutableContact.postValue(it)
+        disposable?.dispose()
+
+        disposable = ContactRepository.getContact(
+            getApplication(),
+            lookup
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = { contact: ContactEntity ->
+                    mutableContact.postValue(contact)
+                },
+                onError = {
+                    mutableThrowable.postValue(it)
                 }
-            } catch (e: CancellationException) {
-                Timber.d("ContactDetailsViewModel job cancelled\n$e")
-            }
-        }
+            )
     }
 }

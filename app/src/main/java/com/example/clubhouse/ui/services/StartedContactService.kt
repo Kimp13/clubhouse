@@ -2,20 +2,19 @@ package com.example.clubhouse.ui.services
 
 import android.Manifest
 import android.app.Service
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.IBinder
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-abstract class StartedContactService : Service(), CoroutineScope {
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+abstract class StartedContactService : Service() {
+    protected val disposable = CompositeDisposable()
+
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-        job.cancel()
+        disposable.dispose()
 
         super.onDestroy()
     }
