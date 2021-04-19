@@ -150,6 +150,10 @@ class ContactListFragment :
     }
 
     private fun updateUI() {
+        viewModel.error.observe(viewLifecycleOwner) {
+            viewAdapter?.items = listOf(ContactListItem.Error)
+        }
+
         viewModel.contactList.observe(viewLifecycleOwner) {
             updateContactList(it)
 
@@ -158,6 +162,10 @@ class ContactListFragment :
 
         (activity as? ReadContactsPermissionRequester)?.run {
             requestPermission {
+                if (viewModel.contactList.value == null) {
+                    viewAdapter?.items = listOf(ContactListItem.Progress)
+                }
+
                 viewModel.contactList.observe(viewLifecycleOwner) {
                     updateContactList(it)
                 }
@@ -168,6 +176,8 @@ class ContactListFragment :
     }
 
     private fun search(query: String?) {
+        viewAdapter?.items = listOf(ContactListItem.Progress)
+
         viewModel.provideContactList(query)
     }
 

@@ -13,12 +13,16 @@ import timber.log.Timber
 
 class ContactListViewModel(application: Application) :
     AndroidViewModel(application) {
+    val error: LiveData<Unit>
+        get() = mutableError
+
     val contactList: LiveData<List<SimpleContactEntity>>
         get() = mutableContactList
 
     var searchQuery: String? = null
         private set
 
+    private val mutableError = MutableLiveData<Unit>()
     private val mutableContactList =
         MutableLiveData<List<SimpleContactEntity>>()
 
@@ -42,7 +46,7 @@ class ContactListViewModel(application: Application) :
                     query
                 )?.let {
                     mutableContactList.postValue(it)
-                }
+                } ?: mutableError.postValue(Unit)
             } catch (e: CancellationException) {
                 Timber.d("ContactListViewModel job cancelled\n$e")
             }

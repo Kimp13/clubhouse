@@ -42,4 +42,6 @@
     <string name="refresh">Refresh</string>
     <string name="hello_world">Hello, World!</string>
     <string name="total_contacts">Total contacts: %d</string>
+    <string name="loading">Loading…</string>
+    <string name="error">An error occurred.</string>
 </resources>

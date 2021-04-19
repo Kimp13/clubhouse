@@ -33,4 +33,6 @@
     <string name="refresh">Обновить</string>
     <string name="hello_world">Привет, Мир!</string>
     <string name="total_contacts">Всего контактов: %d</string>
+    <string name="loading">Загрузка…</string>
+    <string name="error">Произошла ошибка.</string>
 </resources>
