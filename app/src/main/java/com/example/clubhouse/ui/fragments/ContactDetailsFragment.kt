@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.clubhouse.R
@@ -93,18 +94,28 @@ class ContactDetailsFragment :
         this.contactEntity = contact
 
         binding?.run {
+            if (!contactDetailsRefreshView.isEnabled) {
+                contactDetailsRefreshView.isEnabled = true
+                contactDetailsContents.removeView(
+                    contactDetailsProgressGroup
+                )
+            }
+
             contact.photoId?.let {
                 contactDetailsPhoto.run {
                     setImageURI(ContactRepository.makePhotoUri(it))
-
+                    visibility = View.VISIBLE
                     imageTintList = null
                 }
             }
 
             contactDetailsName.text =
                 contact.name ?: getString(R.string.no_name)
+            contactDetailsName.visibility = View.VISIBLE
+
             contactDetailsDescription.text =
                 contact.description ?: getString(R.string.no_description)
+            contactDetailsDescription.visibility = View.VISIBLE
 
             val phonesIterator = contact.phoneNumbers.listIterator()
             val emailsIterator = contact.emails.listIterator()
@@ -115,8 +126,7 @@ class ContactDetailsFragment :
             ).forEach {
                 if (phonesIterator.hasNext()) {
                     it.text = phonesIterator.next()
-                } else {
-                    it.visibility = View.GONE
+                    it.visibility = View.VISIBLE
                 }
             }
 
@@ -126,12 +136,12 @@ class ContactDetailsFragment :
             ).forEach {
                 if (emailsIterator.hasNext()) {
                     it.text = emailsIterator.next()
-                } else {
-                    it.visibility = View.GONE
+                    it.visibility = View.VISIBLE
                 }
             }
 
             contact.birthDate?.run {
+                contactDetailsBirthDate.visibility = View.VISIBLE
                 contactDetailsRemindTextView.visibility = View.VISIBLE
 
                 contactDetailsRemindSwitch.run {
@@ -148,7 +158,8 @@ class ContactDetailsFragment :
                     DateUtils.formatDateTime(
                         requireContext(),
                         timeInMillis,
-                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
+                        DateUtils.FORMAT_SHOW_DATE or
+                                DateUtils.FORMAT_NO_YEAR
                     )
                 )
             }
@@ -156,6 +167,13 @@ class ContactDetailsFragment :
     }
 
     private fun updateUI() {
+        viewModel.error.observe(viewLifecycleOwner) {
+            binding?.contactDetailsContents?.children?.forEach {
+                it.visibility = View.GONE
+            }
+            binding?.contactDetailsErrorGroup?.visibility = View.VISIBLE
+        }
+
         viewModel.contact.observe(viewLifecycleOwner) { contact ->
             updateContact(contact)
 
@@ -178,11 +196,14 @@ class ContactDetailsFragment :
     }
 
     private fun initializeRefreshView() {
-        binding?.contactDetailsRefreshView?.setColorSchemeResources(
-            R.color.colorPrimary
-        )
-        binding?.contactDetailsRefreshView?.setOnRefreshListener {
-            refreshContactDetails()
+        binding?.contactDetailsRefreshView?.run {
+            setColorSchemeResources(
+                R.color.colorPrimary
+            )
+            setOnRefreshListener {
+                refreshContactDetails()
+            }
+            isEnabled = false
         }
     }
 }

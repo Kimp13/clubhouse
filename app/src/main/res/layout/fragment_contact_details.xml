@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/contactDetailsRefreshView"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contactDetailsRefreshView"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contactDetailsContents"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/cardPadding">
+
+        <LinearLayout
+            android:id="@+id/contactDetailsErrorGroup"
+            style="@style/ContactDetailsGroup"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <include layout="@layout/error_group" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/contactDetailsProgressGroup"
+            style="@style/ContactDetailsGroup"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <include layout="@layout/progress_group" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/contactDetailsPhoto"
@@ -17,6 +37,7 @@
             android:layout_height="@dimen/cardImageViewSide"
             android:contentDescription="@string/photo"
             android:src="@drawable/ic_baseline_person_24"
+            android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/colorPrimary" />
@@ -28,6 +49,7 @@
             android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
             android:gravity="center_vertical"
             android:text="@string/name"
+            android:visibility="visible"
             app:layout_constraintStart_toEndOf="@id/contactDetailsPhoto"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,6 +57,7 @@
             android:id="@+id/contactDetailsPhone1"
             style="@style/ContactDetailsListItem"
             android:text="@string/phone"
+            android:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contactDetailsPhoto" />
 
@@ -71,6 +94,7 @@
             android:layout_height="@dimen/cardImageViewSide"
             android:gravity="center_vertical"
             android:text="@string/description"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contactDetailsBirthDate" />
 
