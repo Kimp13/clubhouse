@@ -7,12 +7,11 @@ import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.ContactRepository
+import com.example.clubhouse.data.entities.ContactEntity
 import com.example.clubhouse.databinding.FragmentContactDetailsBinding
+import com.example.clubhouse.ui.delegates.ContactPhotoDelegate
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.interfaces.ReadContactsPermissionRequester
 import com.example.clubhouse.ui.viewmodels.ContactDetailsViewModel
@@ -21,7 +20,7 @@ const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
 const val CONTACT_ARG_LOOKUP_KEY = "argument_lookup_key"
 
 class ContactDetailsFragment :
-    Fragment(R.layout.fragment_contact_details) {
+    ContactFragment(R.layout.fragment_contact_details) {
     companion object {
         fun newInstance(lookup: String) = ContactDetailsFragment().apply {
             arguments = Bundle().apply {
@@ -30,7 +29,9 @@ class ContactDetailsFragment :
         }
     }
 
-    private val viewModel: ContactDetailsViewModel by viewModels()
+    private val viewModel: ContactDetailsViewModel by viewModels {
+        viewModelFactory
+    }
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
     private var isReminded: Boolean = false
@@ -103,7 +104,7 @@ class ContactDetailsFragment :
 
             contact.photoId?.let {
                 contactDetailsPhoto.run {
-                    setImageURI(ContactRepository.makePhotoUri(it))
+                    setImageURI(ContactPhotoDelegate.makePhotoUri(it))
                     visibility = View.VISIBLE
                     imageTintList = null
                 }

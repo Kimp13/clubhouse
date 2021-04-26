@@ -1,7 +1,7 @@
 package com.example.clubhouse.ui.adapters
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.clubhouse.data.SimpleContactEntity
+import com.example.clubhouse.data.entities.SimpleContactEntity
 import com.example.clubhouse.ui.adapters.items.ContactListItem
 import com.example.clubhouse.ui.delegates.contactEntityDelegate
 import com.example.clubhouse.ui.delegates.contactErrorDelegate

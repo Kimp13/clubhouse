@@ -8,11 +8,10 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.clubhouse.R
-import com.example.clubhouse.data.SimpleContactEntity
+import com.example.clubhouse.data.entities.SimpleContactEntity
 import com.example.clubhouse.databinding.FragmentContactListBinding
 import com.example.clubhouse.ui.adapters.ContactAdapter
 import com.example.clubhouse.ui.adapters.decorations.ContactListDecoration
@@ -24,13 +23,14 @@ import com.example.clubhouse.ui.viewmodels.ContactListViewModel
 
 const val CONTACT_LIST_FRAGMENT_TAG = "fragment_contact_list"
 
-class ContactListFragment :
-    Fragment(R.layout.fragment_contact_list) {
+class ContactListFragment : ContactFragment(R.layout.fragment_contact_list) {
     private var cardClickListener: ContactCardClickListener? = null
     private var viewAdapter: ContactAdapter? = null
     private var binding: FragmentContactListBinding? = null
-    private val viewModel: ContactListViewModel by viewModels()
     private lateinit var recyclerViewDecoration: ContactListDecoration
+    private val viewModel: ContactListViewModel by viewModels {
+        viewModelFactory
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
