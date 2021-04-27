@@ -5,7 +5,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactRepository
 import com.example.clubhouse.ui.adapters.items.ContactListItem
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegate
 
@@ -44,7 +43,7 @@ fun contactEntityDelegate(
     bind {
         contactPhoto.run {
             item.contact.photoId?.let {
-                setImageURI(ContactRepository.makePhotoUri(it))
+                setImageURI(ContactPhotoDelegate.makePhotoUri(it))
                 imageTintList = null
             } ?: run {
                 setImageResource(R.drawable.ic_baseline_person_24)

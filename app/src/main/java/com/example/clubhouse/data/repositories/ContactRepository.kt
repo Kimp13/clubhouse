@@ -1,16 +1,19 @@
-package com.example.clubhouse.data
+package com.example.clubhouse.data.repositories
 
 import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
 import android.provider.ContactsContract
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import com.example.clubhouse.data.entities.ContactEntity
+import com.example.clubhouse.data.entities.SimpleContactEntity
+import com.example.clubhouse.data.helpers.BirthDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 private const val SELECTION = "${ContactsContract.Data.LOOKUP_KEY} = ?"
 private val CONTACT_PROJECTION = arrayOf(
@@ -49,17 +52,11 @@ private const val DATA_FIELD_INDEX = 2
 private const val DATA_ADDITIONAL_FIELD_INDEX = 3
 private const val DATA_PHOTO_ID_INDEX = 4
 
-object ContactRepository {
-    fun makePhotoUri(photoId: Long) =
-        ContentUris.withAppendedId(
-            ContactsContract.DisplayPhoto.CONTENT_URI,
-            photoId
-        )
-
-    suspend fun getSimpleContacts(
-        context: Context,
-        query: String?
-    ): List<SimpleContactEntity>? = withContext(Dispatchers.IO) {
+class ContactRepository @Inject constructor(
+    private val context: Context
+) {
+    suspend fun getSimpleContacts(query: String?):
+            List<SimpleContactEntity>? = withContext(Dispatchers.IO) {
         context.contentResolver?.let { resolver ->
             val contacts = getContactListFramework(resolver, query)
             val lookupToIndex = contacts.withIndex().associate {
@@ -117,14 +114,12 @@ object ContactRepository {
         }
     }
 
-    suspend fun getContacts(
-        context: Context,
-        lookups: List<String?>
-    ): List<ContactEntity> = withContext(Dispatchers.IO) {
+    suspend fun getContacts(lookups: List<String?>):
+            List<ContactEntity> = withContext(Dispatchers.IO) {
         lookups.mapNotNull {
             it?.let {
                 async {
-                    getContact(context, it)
+                    getContact(it)
                 }
             }
         }
@@ -132,10 +127,7 @@ object ContactRepository {
             .filterNotNull()
     }
 
-    suspend fun getContact(
-        context: Context,
-        lookup: String
-    ) = withContext(Dispatchers.IO) {
+    suspend fun getContact(lookup: String) = withContext(Dispatchers.IO) {
         context.contentResolver?.let { resolver ->
             getContactId(resolver, lookup)?.let { id ->
                 var name: String? = null

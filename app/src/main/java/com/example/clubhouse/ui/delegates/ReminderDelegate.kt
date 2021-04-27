@@ -7,7 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactEntity
+import com.example.clubhouse.data.entities.ContactEntity
 import com.example.clubhouse.data.isLeap
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.clubhouse.ui.receivers.ContactBirthdayReceiver

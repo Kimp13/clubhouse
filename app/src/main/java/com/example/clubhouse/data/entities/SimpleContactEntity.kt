@@ -1,4 +1,4 @@
-package com.example.clubhouse.data
+package com.example.clubhouse.data.entities
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

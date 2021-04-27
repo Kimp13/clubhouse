@@ -7,8 +7,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.clubhouse.R
-import com.example.clubhouse.data.ContactEntity
-import com.example.clubhouse.data.ContactRepository
+import com.example.clubhouse.data.entities.ContactEntity
 import com.example.clubhouse.ui.activities.MainActivity
 import com.example.clubhouse.ui.delegates.ReminderDelegate
 import com.example.clubhouse.ui.fragments.CONTACT_ARG_LOOKUP_KEY
@@ -28,10 +27,7 @@ class BirthdayNotificationService : StartedContactService() {
             if (checkReadContactsPermission()) {
                 launch {
                     try {
-                        ContactRepository.getContact(
-                            this@BirthdayNotificationService,
-                            lookup
-                        )?.let { contact ->
+                        repository.getContact(lookup)?.let { contact ->
                             showBirthdayNotification(contact)
                             ReminderDelegate.setReminder(
                                 this@BirthdayNotificationService,
