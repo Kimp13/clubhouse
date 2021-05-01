@@ -14,7 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Clubhouse">
-        <activity android:name="com.example.clubhouse.ui.activities.MainActivity">
+        <activity android:name="com.example.presentation.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="@string/birthday_notification_action" />
@@ -23,10 +23,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ui.services.BirthdayNotificationService" />
-        <service android:name=".ui.services.RebootReminderService" />
+        <service android:name="com.example.presentation.services.BirthdayNotificationService" />
+        <service android:name="com.example.presentation.services.RebootReminderService" />
 
-        <receiver android:name=".ui.receivers.ContactBirthdayReceiver">
+        <receiver android:name="com.example.presentation.receivers.ContactBirthdayReceiver">
             <intent-filter>
                 <action android:name="@string/birthday_action" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

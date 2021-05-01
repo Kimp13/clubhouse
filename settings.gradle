@@ -1,2 +1,4 @@
+include ':presentation'
+include ':domain'
 include ':app'
 rootProject.name = "Clubhouse"
