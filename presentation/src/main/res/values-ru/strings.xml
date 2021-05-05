@@ -35,4 +35,13 @@
     <string name="total_contacts">Всего контактов: %d</string>
     <string name="loading">Загрузка…</string>
     <string name="error">Произошла ошибка.</string>
+    <string name="contact_location">Местоположение контакта</string>
+    <string name="no_location_set">Местоположение не указано</string>
+    <string name="set">Указать</string>
+    <string name="location_fmt">Местоположение: %f, %f</string>
+    <string name="change">Изменить</string>
+    <string name="clarify_card_controls_text">
+        Нажимайте на карту, чтобы выбрать местоположение.
+    </string>
+    <string name="clarify_card_controls_ok">Ясно!</string>
 </resources>

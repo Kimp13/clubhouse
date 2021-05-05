@@ -8,7 +8,7 @@ import com.example.clubhouse.scopes.ContactDetailsFragmentScope
 import com.example.domain.interactors.implementations.ContactDetailsFragmentInteractor
 import com.example.domain.interactors.interfaces.ContactDetailsInteractor
 import com.example.domain.repositories.ContactRepository
-import com.example.presentation.viewmodels.ContactDetailsViewModel
+import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap

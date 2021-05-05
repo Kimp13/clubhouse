@@ -11,6 +11,7 @@
         <item name="colorOnSecondary">@color/black</item>
 
         <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="ellipsizedTextView">@style/EllipsizedTextView</item>
     </style>
 
     <style name="ContactDetailsListItem">
@@ -30,5 +31,18 @@
 
     <style name="CardGroup" parent="ContactDetailsGroup">
         <item name="android:background">@drawable/round_card_background</item>
+    </style>
+
+    <style name="MapFooterSubmit">
+        <item name="android:layout_width">@dimen/iconButtonSide</item>
+        <item name="android:layout_height">@dimen/iconButtonSide</item>
+        <item name="android:layout_marginStart">@dimen/mapFooterGap</item>
+    </style>
+
+    <style name="EllipsizedTextView">
+        <item name="android:clickable">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:focusable">true</item>
+        <item name="android:maxLines">1</item>
     </style>
 </resources>
