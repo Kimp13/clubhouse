@@ -7,6 +7,7 @@ import com.example.clubhouse.components.AnnotatedContactLocationFragmentComponen
 import com.example.clubhouse.components.AnnotatedServiceComponent
 import com.example.clubhouse.modules.AppModule
 import com.example.clubhouse.modules.NetworkModule
+import com.example.clubhouse.modules.DatabaseModule
 import com.example.clubhouse.modules.RepositoryModule
 import com.example.presentation.di.components.ApplicationComponent
 import com.example.presentation.di.interfaces.AppComponentOwner
@@ -19,6 +20,7 @@ import javax.inject.Singleton
     modules = [
         AppModule::class,
         RepositoryModule::class,
+        DatabaseModule::class,
         NetworkModule::class
     ]
 )

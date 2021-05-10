@@ -3,6 +3,12 @@ package com.example.clubhouse.modules
 import android.content.Context
 import com.example.clubhouse.qualifiers.CommonSharedPreferences
 import com.example.clubhouse.qualifiers.ContactSharedPreferences
+import com.example.domain.repositories.BasicTypesRepository
+import com.example.domain.repositories.ContactRepository
+import com.example.domain.repositories.LocationRepository
+import com.example.presentation.data.daos.ContactLocationDao
+import com.example.domain.repositories.LastLocationRepository
+import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.implementations.DateTimeRepositoryImpl
 import com.example.domain.repositories.interfaces.BasicTypesRepository
@@ -15,6 +21,7 @@ import com.example.presentation.data.repositories.AlarmRepository
 import com.example.presentation.data.repositories.COMMON_SHARED_PREFERENCES_KEY
 import com.example.presentation.data.repositories.CONTACT_SHARED_PREFERENCES_KEY
 import com.example.presentation.data.repositories.ContactProviderRepository
+import com.example.presentation.data.repositories.LocationRepositoryImpl
 import com.example.presentation.data.repositories.FusedClientLocationRepository
 import com.example.presentation.data.repositories.GoogleGeocodingRepository
 import com.example.presentation.data.repositories.UniversalSharedPreferencesRepository
@@ -30,14 +37,6 @@ class RepositoryModule {
         context: Context
     ): ContactRepository {
         return ContactProviderRepository(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLastLocationRepository(
-        context: Context
-    ): LastLocationRepository {
-        return FusedClientLocationRepository(context)
     }
 
     @Provides
@@ -72,6 +71,13 @@ class RepositoryModule {
     @Singleton
     fun provideDateTimeRepository(): DateTimeRepository =
         DateTimeRepositoryImpl()
+
+    fun provideLocationRepository(
+        context: Context,
+        contactLocationDao: ContactLocationDao
+    ): LocationRepository {
+        return LocationRepositoryImpl(context, contactLocationDao)
+    }
 
     @Provides
     @Singleton

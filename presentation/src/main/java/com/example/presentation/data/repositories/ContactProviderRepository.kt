@@ -238,15 +238,14 @@ class ContactProviderRepository(
                     }
 
                     ContactEntity(
-                        id,
-                        lookup,
-                        name,
-                        description,
-                        birthDate,
-                        photoId,
-                        null, // TODO: Получение локации из БД
-                        phones,
-                        emails
+                        id = id,
+                        lookup = lookup,
+                        name = name,
+                        description = description,
+                        birthDate = birthDate,
+                        photoId = photoId,
+                        phones = phones,
+                        emails = emails
                     )
                 }
             }

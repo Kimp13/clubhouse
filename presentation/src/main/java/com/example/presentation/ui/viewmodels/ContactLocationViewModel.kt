@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.entities.ContactLocation
 import com.example.domain.interactors.implementations.ContactLocationInteractor
 import com.example.presentation.data.toLocationEntity
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
@@ -87,17 +88,26 @@ class ContactLocationViewModel(
             )
         )
 
-        viewModelScope.launch {
-            currentPoint?.run {
-                /* TODO: запись в БД */
-            }
+        mutableState.value?.let { state ->
+            viewModelScope.launch {
+                currentPoint?.run {
+                    interactor.addContactLocation(
+                        ContactLocation(
+                            contactId,
+                            state.address,
+                            latitude,
+                            longitude
+                        )
+                    )
+                }
 
-            mutableState.postValue(
-                mutableState.value?.copy(
-                    progress = false,
-                    locationWritten = true
+                mutableState.postValue(
+                    state.copy(
+                        progress = false,
+                        locationWritten = true
+                    )
                 )
-            )
+            }
         }
     }
 

@@ -7,6 +7,10 @@ import com.example.clubhouse.keys.ViewModelKey
 import com.example.clubhouse.qualifiers.CommonSharedPreferences
 import com.example.clubhouse.scopes.ContactLocationFragmentScope
 import com.example.domain.interactors.implementations.ContactLocationInteractor
+import com.example.domain.repositories.BasicTypesRepository
+import com.example.domain.repositories.LocationRepository
+import com.example.domain.repositories.LastLocationRepository
+import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.LastLocationRepository
@@ -37,7 +41,7 @@ class ContactLocationModule {
     @Provides
     @ContactLocationFragmentScope
     fun provideLocationInteractor(
-        locationRepository: LastLocationRepository,
+        locationRepository: LocationRepository,
         geocodingRepository: GeocodingRepository,
 
         @CommonSharedPreferences
