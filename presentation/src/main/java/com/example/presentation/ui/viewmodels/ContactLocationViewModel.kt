@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.entities.ContactLocation
-import com.example.domain.interactors.implementations.ContactLocationInteractor
+import com.example.domain.interactors.implementations.LocationInteractor
 import com.example.presentation.data.toLocationEntity
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
 import com.google.android.gms.maps.model.LatLng
@@ -15,7 +15,7 @@ import timber.log.Timber
 import java.util.*
 
 class ContactLocationViewModel(
-    private val interactor: ContactLocationInteractor
+    private val interactor: LocationInteractor
 ) : ViewModel() {
     var interacted = false
 

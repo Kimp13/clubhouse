@@ -7,8 +7,8 @@ import com.example.clubhouse.keys.ViewModelKey
 import com.example.clubhouse.scopes.ViewContactLocationFragmentScope
 import com.example.domain.interactors.implementations.ViewContactLocationInteractorImpl
 import com.example.domain.interactors.interfaces.ViewContactLocationInteractor
-import com.example.domain.repositories.LocationRepository
 import com.example.domain.repositories.interfaces.ContactRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.presentation.ui.viewmodels.ViewContactLocationViewModel
 import dagger.Module
 import dagger.Provides

@@ -2,19 +2,21 @@ package com.example.domain.interactors.implementations
 
 import com.example.domain.entities.ContactLocation
 import com.example.domain.entities.LocationEntity
-import com.example.domain.interactors.interfaces.LocationInteractor
+import com.example.domain.interactors.interfaces.AssembledLocationInteractor
+import com.example.domain.interactors.interfaces.ContactLocationInteractor
 import com.example.domain.interactors.interfaces.MapControlsClarificationInteractor
-import com.example.domain.repositories.GeocodingRepository
-import com.example.domain.repositories.LocationRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
+import com.example.domain.repositories.interfaces.GeocodingRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 
 private const val ARE_MAP_CONTROLS_CLARIFIED_KEY = "are_map_controls_clarified?"
 
-class ContactLocationInteractor(
+class LocationInteractor(
     private val locationRepository: LocationRepository,
     private val basicTypesRepository: BasicTypesRepository,
     private val geocodingRepository: GeocodingRepository
-) : LocationInteractor,
+) : AssembledLocationInteractor,
+    ContactLocationInteractor,
     MapControlsClarificationInteractor {
     override fun getLastLocation(onSuccess: (LocationEntity?) -> Unit) {
         locationRepository.getUserLastLocation(onSuccess)

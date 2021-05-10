@@ -1,7 +1,7 @@
 package com.example.presentation.data.repositories
 
 import com.example.domain.entities.LocationEntity
-import com.example.domain.repositories.GeocodingRepository
+import com.example.domain.repositories.interfaces.GeocodingRepository
 import com.example.presentation.BuildConfig
 import com.example.presentation.data.apis.GeocodingApi
 import kotlinx.coroutines.Dispatchers

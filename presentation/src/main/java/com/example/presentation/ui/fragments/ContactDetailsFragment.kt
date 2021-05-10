@@ -18,6 +18,7 @@ import com.example.presentation.R
 import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.delegates.ContactPhotoDelegate
+import com.example.presentation.ui.interfaces.ContactLocationNavigator
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
 import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
@@ -47,6 +48,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     private var binding: FragmentContactDetailsBinding? = null
     private var locationRetriever: ContactLocationRetriever? = null
     private var locationViewer: ContactLocationViewer? = null
+    private var contactNavigator: ContactLocationNavigator? = null
     private var isReminded: Boolean = false
         set(value) {
             field = value
@@ -70,6 +72,10 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         if (context is ContactLocationViewer) {
             locationViewer = context
+        }
+
+        if (context is ContactLocationNavigator) {
+            contactNavigator = context
         }
     }
 
@@ -219,6 +225,9 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             viewLocation.setOnClickListener {
                 locationViewer?.viewContactLocation(contact)
             }
+            navigate.setOnClickListener {
+                contactNavigator?.navigateFrom(contact)
+            }
 
             contact.location?.run {
                 locationDescription.text = description ?: getString(
@@ -227,11 +236,13 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                     longitude
                 )
                 viewLocation.visibility = View.VISIBLE
+                navigate.visibility = View.VISIBLE
             } ?: run {
                 locationDescription.text = getString(
                     R.string.no_location_set
                 )
                 viewLocation.visibility = View.GONE
+                navigate.visibility = View.GONE
             }
         }
     }
