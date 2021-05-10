@@ -1,7 +1,7 @@
-package com.example.domain.repositories
+package com.example.domain.interactors.interfaces
 
 import com.example.domain.entities.LocationEntity
 
-interface LastLocationRepository {
+interface UserLastLocationInteractor {
     fun getLastLocation(onSuccess: (LocationEntity?) -> Unit)
 }

@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.clubhouse.factories.AppViewModelFactory
 import com.example.clubhouse.keys.ViewModelKey
 import com.example.clubhouse.scopes.ContactDetailsFragmentScope
-import com.example.domain.interactors.implementations.ContactDetailsFragmentInteractor
+import com.example.domain.interactors.implementations.ContactDetailsInteractorImpl
 import com.example.domain.interactors.interfaces.ContactDetailsInteractor
 import com.example.domain.repositories.ContactRepository
+import com.example.domain.repositories.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import dagger.Module
 import dagger.Provides
@@ -27,9 +28,13 @@ class ContactDetailsModule {
     @Provides
     @ContactDetailsFragmentScope
     fun provideContactDetailsInteractor(
-        contactRepository: ContactRepository
+        contactRepository: ContactRepository,
+        locationRepository: LocationRepository
     ): ContactDetailsInteractor {
-        return ContactDetailsFragmentInteractor(contactRepository)
+        return ContactDetailsInteractorImpl(
+            contactRepository,
+            locationRepository
+        )
     }
 
     @Provides

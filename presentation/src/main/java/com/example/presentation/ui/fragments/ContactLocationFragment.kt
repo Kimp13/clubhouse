@@ -10,8 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.domain.entities.ContactEntity
 import com.example.presentation.R
-import com.example.presentation.data.entities.ParcelableContactLocationEntity
-import com.example.presentation.data.toParcelable
+import com.example.presentation.data.entities.ParcelableContactLocation
+import com.example.presentation.data.entities.toParcelable
 import com.example.presentation.databinding.FragmentContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.interfaces.AccessLocationPermissionRequester
@@ -105,7 +105,7 @@ class ContactLocationFragment :
 
         viewModel.currentPoint?.let {
             map?.addMarker(MarkerOptions().position(it))
-        } ?: arguments?.getParcelable<ParcelableContactLocationEntity>(
+        } ?: arguments?.getParcelable<ParcelableContactLocation>(
             CONTACT_ARG_LOCATION
         )?.let {
             val point = LatLng(
