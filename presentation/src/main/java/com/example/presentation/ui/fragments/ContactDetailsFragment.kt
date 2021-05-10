@@ -161,6 +161,9 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             viewLocation.setOnClickListener {
                 gateway?.viewContactLocation(contact)
             }
+            navigate.setOnClickListener {
+                gateway?.navigateFrom(contact)
+            }
 
             contact.location?.run {
                 locationDescription.text = description ?: getString(
@@ -168,12 +171,12 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                     latitude,
                     longitude
                 )
-                viewLocation.visibility = View.VISIBLE
+                listOf(viewLocation, navigate).show()
             } ?: run {
                 locationDescription.text = getString(
                     R.string.no_location_set
                 )
-                viewLocation.visibility = View.GONE
+                listOf(viewLocation, navigate).hide()
             }
         }
     }

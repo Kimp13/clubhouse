@@ -36,7 +36,7 @@ private const val SIMPLE_CONTACT_SELECTION =
 private const val SIMPLE_DATA_SELECTION =
     "${ContactsContract.Data.MIMETYPE} in ('" +
         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE +
-        ", '${ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE}" +
+        "', '${ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE}" +
         "') and ${ContactsContract.Data.LOOKUP_KEY} in "
 private val DATA_PROJECTION = arrayOf(
     ContactsContract.Data.MIMETYPE,
@@ -55,69 +55,72 @@ private const val DATA_PHOTO_ID_INDEX = 4
 class ContactProviderRepository(
     private val context: Context
 ) : ContactRepository {
-    override suspend fun getSimpleContacts(query: String?) =
-        withContext(Dispatchers.IO) {
-            context.contentResolver?.let { resolver ->
-                val contacts = getContactListFramework(resolver, query)
-                val lookupToIndex = contacts.withIndex().associate {
-                    it.value.lookup to it.index
-                }
-                val selection = SIMPLE_DATA_SELECTION +
-                    lookupToIndex.keys.joinToString(
+    override suspend fun getSimpleContacts(
+        query: String?,
+        contactsIds: List<Long>?
+    ) = withContext(Dispatchers.IO) {
+        context.contentResolver?.let { resolver ->
+            val contacts = getContactListFramework(resolver, query, contactsIds)
+            val lookupToIndex = contacts.withIndex()
+                .associate { it.value.lookup to it.index }
+            val selection = SIMPLE_DATA_SELECTION.plus(
+                lookupToIndex.keys
+                    .joinToString(
                         prefix = "(",
                         postfix = ")"
                     ) { "?" }
+            )
 
-                resolver.query(
-                    ContactsContract.Data.CONTENT_URI,
-                    DATA_PROJECTION,
-                    selection,
-                    lookupToIndex.keys.toTypedArray(),
-                    DATA_SORT_ORDER
-                )?.use {
-                    if (it.moveToFirst()) {
-                        do {
-                            it.getStringOrNull(DATA_LOOKUP_INDEX)?.let { key ->
-                                lookupToIndex[key]
-                            }?.let(
-                                fun(i: Int) {
-                                    when (
-                                        it.getStringOrNull(DATA_MIMETYPE_INDEX)
-                                    ) {
-                                        ContactsContract
-                                            .CommonDataKinds
-                                            .Phone
-                                            .CONTENT_ITEM_TYPE -> {
-                                            it.getStringOrNull(
-                                                DATA_FIELD_INDEX
-                                            )?.let { phone ->
-                                                contacts[i].phoneNumber = phone
-                                            }
+            resolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                DATA_PROJECTION,
+                selection,
+                lookupToIndex.keys.toTypedArray(),
+                DATA_SORT_ORDER
+            )?.use {
+                if (it.moveToFirst()) {
+                    do {
+                        it.getStringOrNull(DATA_LOOKUP_INDEX)?.let { key ->
+                            lookupToIndex[key]
+                        }?.let(
+                            fun(i: Int) {
+                                when (
+                                    it.getStringOrNull(DATA_MIMETYPE_INDEX)
+                                ) {
+                                    ContactsContract
+                                        .CommonDataKinds
+                                        .Phone
+                                        .CONTENT_ITEM_TYPE -> {
+                                        it.getStringOrNull(
+                                            DATA_FIELD_INDEX
+                                        )?.let { phone ->
+                                            contacts[i].phoneNumber = phone
                                         }
+                                    }
 
-                                        ContactsContract
-                                            .CommonDataKinds
-                                            .Photo
-                                            .CONTENT_ITEM_TYPE -> {
-                                            it.getLongOrNull(
-                                                DATA_PHOTO_ID_INDEX
-                                            )?.let { rowPhotoId ->
-                                                if (rowPhotoId > 0) {
-                                                    contacts[i].photoId =
-                                                        rowPhotoId
-                                                }
+                                    ContactsContract
+                                        .CommonDataKinds
+                                        .Photo
+                                        .CONTENT_ITEM_TYPE -> {
+                                        it.getLongOrNull(
+                                            DATA_PHOTO_ID_INDEX
+                                        )?.let { rowPhotoId ->
+                                            if (rowPhotoId > 0) {
+                                                contacts[i].photoId =
+                                                    rowPhotoId
                                             }
                                         }
                                     }
                                 }
-                            )
-                        } while (it.moveToNext())
-                    }
+                            }
+                        )
+                    } while (it.moveToNext())
                 }
-
-                contacts
             }
+
+            contacts
         }
+    }
 
     override suspend fun getContacts(lookups: List<String?>) =
         withContext(Dispatchers.IO) {
@@ -163,15 +166,24 @@ class ContactProviderRepository(
 
     private fun getContactListFramework(
         resolver: ContentResolver,
-        query: String?
+        query: String?,
+        contactsIds: List<Long>?
     ): List<SimpleContactEntity> {
         val contactList = mutableListOf<SimpleContactEntity>()
-
-        val (selection, selectionArgs) = if (query == null || query.isBlank()) {
-            null to null
-        } else {
-            SIMPLE_CONTACT_SELECTION to arrayOf("%$query%")
+        val (selection, selectionArgs) = contactsIds?.let {
+            "${ContactsContract.Contacts._ID} in (${it.joinToString(", ")})"
         }
+            .let {
+                if (query == null || query.isBlank()) {
+                    it to null
+                } else {
+                    if (it == null) {
+                        SIMPLE_CONTACT_SELECTION
+                    } else {
+                        "$it and $SIMPLE_CONTACT_SELECTION"
+                    } to arrayOf("%$query%")
+                }
+            }
 
         resolver.query(
             ContactsContract.Contacts.CONTENT_URI,

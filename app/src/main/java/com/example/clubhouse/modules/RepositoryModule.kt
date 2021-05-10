@@ -10,6 +10,7 @@ import com.example.domain.repositories.interfaces.DateTimeRepository
 import com.example.domain.repositories.interfaces.GeocodingRepository
 import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.domain.repositories.interfaces.ReminderRepository
+import com.example.presentation.data.apis.DirectionsApi
 import com.example.presentation.data.apis.GeocodingApi
 import com.example.presentation.data.daos.ContactLocationDao
 import com.example.presentation.data.repositories.AlarmRepository
@@ -70,9 +71,14 @@ class RepositoryModule {
     @Singleton
     fun provideLocationRepository(
         context: Context,
-        contactLocationDao: ContactLocationDao
+        contactLocationDao: ContactLocationDao,
+        directionsApi: DirectionsApi
     ): LocationRepository {
-        return LocationRepositoryImpl(context, contactLocationDao)
+        return LocationRepositoryImpl(
+            context,
+            contactLocationDao,
+            directionsApi
+        )
     }
 
     @Provides

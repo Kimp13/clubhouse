@@ -14,6 +14,7 @@ import com.example.presentation.data.entities.ParcelableContactLocation
 import com.example.presentation.data.entities.toParcelable
 import com.example.presentation.databinding.FragmentContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
+import com.example.presentation.ui.fragments.helpers.MAP_CAMERA_ZOOM_TERM
 import com.example.presentation.ui.interfaces.FragmentGateway
 import com.example.presentation.ui.interfaces.FragmentGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
@@ -30,7 +31,6 @@ import javax.inject.Inject
 const val CONTACT_LOCATION_FRAGMENT_TAG = "fragment_contact_location"
 const val CONTACT_ARG_ID = "argument_id"
 const val CONTACT_ARG_LOCATION = "argument_location"
-const val MAP_CAMERA_ZOOM_TERM = -7.5F
 
 private const val BELOVED_COMPANY_LATITUDE = 56.8463985
 private const val BELOVED_COMPANY_LONGITUDE = 53.2332288
@@ -245,10 +245,14 @@ class ContactLocationFragment :
                     state?.areMapControlsClarified
                         ?.takeIf { !it }
                         ?.let {
-                            ClarifyMapControlsFragment().show(
-                                childFragmentManager,
-                                null
+                            GeneralDialogFragment.newInstance(
+                                R.string.clarify_card_controls_text,
+                                R.string.clarify_card_controls_ok
                             )
+                                .show(
+                                    childFragmentManager,
+                                    null
+                                )
 
                             viewModel.writeMapControlsClarified()
                             viewModel.state.removeObserver(this)

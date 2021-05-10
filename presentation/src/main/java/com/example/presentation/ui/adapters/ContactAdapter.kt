@@ -42,13 +42,13 @@ object ContactDiffCallback : DiffUtil.ItemCallback<ContactListItem>() {
 }
 
 class ContactAdapter(
-    private val headerClickListener: () -> Unit,
+    private val headerClickListener: (() -> Unit)? = null,
     private val contactCardClickListener: (SimpleContactEntity) -> Unit
 ) : AsyncListDifferDelegationAdapter<ContactListItem>(ContactDiffCallback) {
     init {
         delegatesManager.addDelegate(
             contactHeaderDelegate {
-                headerClickListener()
+                headerClickListener?.invoke()
             }
         )
         delegatesManager.addDelegate(contactProgressDelegate())

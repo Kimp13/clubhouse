@@ -7,4 +7,5 @@ interface FragmentGateway :
     ContactLocationViewer,
     PoppableBackStackOwner,
     ReadContactsPermissionRequester,
-    RequestPermissionDialogDismissListener
+    RequestPermissionDialogDismissListener,
+    ContactLocationNavigator

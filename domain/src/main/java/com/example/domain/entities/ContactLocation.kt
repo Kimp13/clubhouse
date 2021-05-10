@@ -6,3 +6,8 @@ data class ContactLocation(
     val latitude: Double,
     val longitude: Double
 )
+
+fun ContactLocation.toLocationEntity() = LocationEntity(
+    latitude,
+    longitude
+)

@@ -8,6 +8,7 @@ import com.example.clubhouse.scopes.ContactListFragmentScope
 import com.example.domain.interactors.implementations.SimpleContactListInteractorImpl
 import com.example.domain.interactors.interfaces.SimpleContactListInteractor
 import com.example.domain.repositories.interfaces.ContactRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactListViewModel
 import dagger.Module
 import dagger.Provides
@@ -18,9 +19,13 @@ class ContactListModule {
     @Provides
     @ContactListFragmentScope
     fun provideSimpleContactListInteractor(
-        contactRepository: ContactRepository
+        contactRepository: ContactRepository,
+        locationRepository: LocationRepository
     ): SimpleContactListInteractor {
-        return SimpleContactListInteractorImpl(contactRepository)
+        return SimpleContactListInteractorImpl(
+            contactRepository,
+            locationRepository
+        )
     }
 
     @Provides

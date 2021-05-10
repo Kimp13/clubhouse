@@ -26,7 +26,10 @@ class ContactListViewModel(
     private val mutableContactList =
         MutableLiveData<List<SimpleContactEntity>>()
 
-    fun provideContactList(query: String? = null) {
+    fun provideContactList(
+        query: String? = null,
+        excludedContactId: Long? = null
+    ) {
         if (query == null) {
             if (mutableContactList.value != null) {
                 mutableContactList.value = mutableContactList.value
@@ -35,13 +38,16 @@ class ContactListViewModel(
             searchQuery = query
         }
 
-        refreshContactList(searchQuery)
+        refreshContactList(searchQuery, excludedContactId)
     }
 
-    fun refreshContactList(query: String? = searchQuery) {
+    fun refreshContactList(
+        query: String? = searchQuery,
+        excludedContactId: Long? = null
+    ) {
         viewModelScope.launch {
             try {
-                interactor.getSimpleContacts(query)?.let {
+                interactor.getSimpleContacts(query, excludedContactId)?.let {
                     mutableContactList.postValue(it)
                 } ?: mutableError.postValue(Unit)
             } catch (e: CancellationException) {
