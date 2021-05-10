@@ -5,6 +5,7 @@
         clubhouse_notification_birthday_action
     </string>
     <string name="birthday_channel_id" translatable="false">clubhouse_notification</string>
+
     <string name="search_contacts">Search contacts…</string>
     <string name="photo">Photo</string>
     <string name="name">Name</string>
@@ -44,4 +45,13 @@
     <string name="total_contacts">Total contacts: %d</string>
     <string name="loading">Loading…</string>
     <string name="error">An error occurred.</string>
+    <string name="contact_location">Contact location</string>
+    <string name="no_location_set">No location set</string>
+    <string name="set">Set</string>
+    <string name="change">Change</string>
+    <string name="location_fmt">Location: %f, %f</string>
+    <string name="clarify_card_controls_text">
+        Tap the map to choose a location.
+    </string>
+    <string name="clarify_card_controls_ok">Clear!</string>
 </resources>

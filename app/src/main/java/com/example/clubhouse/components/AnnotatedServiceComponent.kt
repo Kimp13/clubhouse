@@ -2,7 +2,7 @@ package com.example.clubhouse.components
 
 import com.example.clubhouse.modules.ServiceModule
 import com.example.clubhouse.scopes.ServiceScope
-import com.example.presentation.services.ServiceComponent
+import com.example.presentation.ui.services.ServiceComponent
 import dagger.Subcomponent
 
 @Subcomponent(modules = [ServiceModule::class])

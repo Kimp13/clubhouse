@@ -3,18 +3,19 @@ package com.example.clubhouse
 import android.app.Application
 import com.example.clubhouse.components.AnnotatedContactDetailsFragmentComponent
 import com.example.clubhouse.components.AnnotatedContactListFragmentComponent
+import com.example.clubhouse.components.AnnotatedContactLocationFragmentComponent
 import com.example.clubhouse.components.AnnotatedServiceComponent
 import com.example.clubhouse.modules.AppModule
-import com.example.clubhouse.modules.ContactRepositoryModule
-import com.example.presentation.interfaces.AppComponentOwner
-import com.example.presentation.interfaces.ApplicationComponent
+import com.example.clubhouse.modules.RepositoryModule
+import com.example.presentation.di.components.ApplicationComponent
+import com.example.presentation.di.interfaces.AppComponentOwner
 import dagger.Component
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 import javax.inject.Singleton
 
 @Component(
-    modules = [AppModule::class, ContactRepositoryModule::class]
+    modules = [AppModule::class, RepositoryModule::class]
 )
 @Singleton
 interface AnnotatedApplicationComponent : ApplicationComponent {
@@ -25,6 +26,9 @@ interface AnnotatedApplicationComponent : ApplicationComponent {
 
     override fun contactListFragmentComponent():
             AnnotatedContactListFragmentComponent.Factory
+
+    override fun contactLocationFragmentComponent():
+            AnnotatedContactLocationFragmentComponent.Factory
 }
 
 class ContactApplication : Application(), AppComponentOwner {

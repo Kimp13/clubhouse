@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-parcelize'
     id 'kotlin-kapt'
+    id 'com.google.secrets_gradle_plugin' version '0.5'
 }
 
 android {
@@ -50,6 +50,10 @@ dependencies {
     /* Dagger */
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
+
+    /* Google Play services */
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.1'
 
     /* Jetpack */
     implementation 'androidx.appcompat:appcompat:1.2.0'

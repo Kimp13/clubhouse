@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/contactLocationMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal"
+        android:padding="@dimen/mapFooterGap">
+
+        <com.example.presentation.ui.views.EllipsizedTextView
+            android:id="@+id/contactLocationTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/no_location_set"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ImageView
+            android:id="@+id/contactLocationSubmit"
+            style="@style/MapFooterSubmit"
+            android:background="@drawable/clickable_primary_background_borderless"
+            android:clickable="true"
+            android:contentDescription="@string/set"
+            android:focusable="true"
+            android:src="@drawable/ic_baseline_check_24"
+            android:visibility="gone"
+            app:tint="?attr/colorPrimary" />
+
+        <ProgressBar
+            android:id="@+id/contactLocationProgressBar"
+            style="@style/MapFooterSubmit"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>
