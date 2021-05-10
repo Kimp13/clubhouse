@@ -1,13 +1,17 @@
 package com.example.clubhouse.modules
 
 import android.content.Context
+import com.example.domain.repositories.BasicTypesRepository
 import com.example.domain.repositories.ContactRepository
+import com.example.domain.repositories.LocationRepository
+import com.example.presentation.data.daos.ContactLocationDao
 import com.example.domain.repositories.LastLocationRepository
 import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.presentation.data.apis.GeocodingApi
 import com.example.presentation.data.repositories.CommonSharedPreferencesRepository
 import com.example.presentation.data.repositories.ContactProviderRepository
+import com.example.presentation.data.repositories.LocationRepositoryImpl
 import com.example.presentation.data.repositories.FusedClientLocationRepository
 import com.example.presentation.data.repositories.GoogleGeocodingRepository
 import com.google.gson.Gson
@@ -27,21 +31,25 @@ class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLastLocationRepository(
+    fun provideBasicTypesRepository(
         context: Context
-    ): LastLocationRepository {
-        return FusedClientLocationRepository(context)
+    ): BasicTypesRepository {
+        return CommonSharedPreferencesRepository(context)
     }
 
     @Provides
     @Singleton
-    fun provideSharedPreferencesRepository(
-        context: Context
-    ): SharedPreferencesRepository = CommonSharedPreferencesRepository(context)
+    fun provideLocationRepository(
+        context: Context,
+        contactLocationDao: ContactLocationDao
+    ): LocationRepository {
+        return LocationRepositoryImpl(context, contactLocationDao)
+    }
 
     @Provides
     @Singleton
     fun provideGeocodingRepository(
         api: GeocodingApi
     ): GeocodingRepository = GoogleGeocodingRepository(api)
+
 }

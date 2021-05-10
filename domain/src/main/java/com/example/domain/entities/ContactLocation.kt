@@ -1,6 +1,6 @@
 package com.example.domain.entities
 
-data class ContactLocationEntity(
+data class ContactLocation(
     val contactId: Long,
     val description: String?,
     val latitude: Double,
