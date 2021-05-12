@@ -250,13 +250,13 @@ class ContactLocationFragment :
             if (state.progress) {
                 indicateProgress()
             } else {
-                state.address ?: viewModel.currentPoint?.let {
+                (state.address ?: viewModel.currentPoint?.let {
                     getString(
                         R.string.location_fmt,
                         it.latitude,
                         it.longitude
                     )
-                }?.let {
+                })?.let {
                     setLocationString(it)
                 } ?: onNoAddressAvailable()
             }

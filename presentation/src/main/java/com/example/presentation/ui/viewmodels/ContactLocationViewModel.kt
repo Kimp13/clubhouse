@@ -5,10 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.interactors.implementations.ContactLocationInteractor
+import com.example.presentation.data.toLocationEntity
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.*
 
 class ContactLocationViewModel(
     private val interactor: ContactLocationInteractor
@@ -31,16 +34,31 @@ class ContactLocationViewModel(
                 )
             )
 
-            value?.let { point ->
+            value?.toLocationEntity()?.let { point ->
                 addressJob = viewModelScope.launch {
-                    /* TODO: обратный геокодинг */
-
-                    mutableState.postValue(
-                        mutableState.value?.copy(
-                            address = null,
-                            progress = false
+                    try {
+                        interactor.reverseGeocode(
+                            point,
+                            Locale.getDefault().language
                         )
-                    )
+                            .let {
+                                mutableState.postValue(
+                                    mutableState.value?.copy(
+                                        address = it,
+                                        progress = false
+                                    )
+                                )
+                            }
+                    } catch (e: Throwable) {
+                        Timber.e(e)
+
+                        mutableState.postValue(
+                            mutableState.value?.copy(
+                                address = null,
+                                progress = false
+                            )
+                        )
+                    }
                 }
             }
         }

@@ -17,6 +17,12 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+                'String',
+                'GOOGLE_GEOCODING_URI',
+                '"https://maps.googleapis.com/maps/api/geocode/"'
+        )
     }
 
     buildTypes {
@@ -47,9 +53,16 @@ dependencies {
     /* Timber */
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
+    /* Retrofit */
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+
     /* Dagger */
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
+
+    /* Gson */
+    implementation "com.google.code.gson:gson:$gson_version"
 
     /* Google Play services */
     implementation 'com.google.android.gms:play-services-location:18.0.0'
