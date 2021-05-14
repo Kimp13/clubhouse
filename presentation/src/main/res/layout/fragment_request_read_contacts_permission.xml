@@ -7,7 +7,7 @@
     android:padding="@dimen/cardListPadding">
 
     <ImageView
-        android:id="@+id/requestPermissionsImageView"
+        android:id="@+id/imageView"
         android:layout_width="@dimen/cardImageViewSide"
         android:layout_height="@dimen/cardImageViewSide"
         android:layout_marginBottom="@dimen/cardListPadding"
@@ -15,7 +15,7 @@
         android:src="@drawable/ic_crying_emoji" />
 
     <TextView
-        android:id="@+id/requestPermissionsTextView"
+        android:id="@+id/plea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/cardHorizontalMargin"
@@ -23,7 +23,7 @@
         android:text="@string/request_contact_read_permission_again" />
 
     <Button
-        android:id="@+id/requestPermissionsButton"
+        android:id="@id/submit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/cardListPadding"

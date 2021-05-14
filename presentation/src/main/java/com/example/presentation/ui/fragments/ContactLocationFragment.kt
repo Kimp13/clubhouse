@@ -83,7 +83,7 @@ class ContactLocationFragment :
 
         checkControlsClarification()
 
-        (childFragmentManager.findFragmentById(R.id.contactLocationMap)
+        (childFragmentManager.findFragmentById(R.id.map)
                 as? SupportMapFragment)?.getMapAsync(this)
 
         (activity as? AppCompatActivity)?.supportActionBar?.run {
@@ -145,9 +145,9 @@ class ContactLocationFragment :
         point?.let {
             map?.addMarker(MarkerOptions().position(it))
 
-            binding?.contactLocationTextView?.visibility = View.GONE
-            binding?.contactLocationSubmit?.visibility = View.GONE
-            binding?.contactLocationProgressBar?.visibility = View.VISIBLE
+            binding?.locationDescription?.visibility = View.GONE
+            binding?.submit?.visibility = View.GONE
+            binding?.progressBar?.visibility = View.VISIBLE
 
             viewModel.currentPoint = it
         } ?: onNoAddressAvailable()
@@ -183,31 +183,31 @@ class ContactLocationFragment :
     }
 
     private fun onNoAddressAvailable() {
-        binding?.contactLocationTextView?.visibility = View.VISIBLE
-        binding?.contactLocationSubmit?.visibility = View.GONE
-        binding?.contactLocationProgressBar?.visibility = View.GONE
+        binding?.locationDescription?.visibility = View.VISIBLE
+        binding?.submit?.visibility = View.GONE
+        binding?.progressBar?.visibility = View.GONE
 
-        binding?.contactLocationTextView?.text = getString(
+        binding?.locationDescription?.text = getString(
             R.string.no_location_set
         )
     }
 
     private fun indicateProgress() {
-        binding?.contactLocationTextView?.visibility = View.GONE
-        binding?.contactLocationSubmit?.visibility = View.GONE
-        binding?.contactLocationProgressBar?.visibility = View.VISIBLE
+        binding?.locationDescription?.visibility = View.GONE
+        binding?.submit?.visibility = View.GONE
+        binding?.progressBar?.visibility = View.VISIBLE
     }
 
     private fun setLocationString(location: String) {
-        binding?.contactLocationTextView?.visibility = View.VISIBLE
-        binding?.contactLocationSubmit?.visibility = View.VISIBLE
-        binding?.contactLocationProgressBar?.visibility = View.GONE
+        binding?.locationDescription?.visibility = View.VISIBLE
+        binding?.submit?.visibility = View.VISIBLE
+        binding?.progressBar?.visibility = View.GONE
 
-        binding?.contactLocationTextView?.text = location
+        binding?.locationDescription?.text = location
     }
 
     private fun makeSubmitClickable() {
-        binding?.contactLocationSubmit?.setOnClickListener {
+        binding?.submit?.setOnClickListener {
             arguments?.getLong(CONTACT_ARG_ID)?.let { id ->
                 viewModel.submit(id)
 
