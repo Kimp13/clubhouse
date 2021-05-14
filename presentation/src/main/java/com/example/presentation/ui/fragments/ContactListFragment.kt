@@ -90,7 +90,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
 
         menu.findItem(R.id.menuRefresh)?.run {
             setOnMenuItemClickListener {
-                binding?.contactListRefreshView?.isRefreshing = true
+                binding?.refreshView?.isRefreshing = true
                 refreshContactList()
 
                 true
@@ -148,7 +148,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     }
 
     private fun initializeRecyclerView() {
-        binding?.contactListRecyclerView?.run {
+        binding?.recyclerView?.run {
             viewAdapter = ContactAdapter {
                 cardClickListener?.onCardClick(it.lookup)
             }
@@ -173,7 +173,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
         viewModel.contactList.observe(viewLifecycleOwner) {
             updateContactList(it)
 
-            binding?.contactListRefreshView?.isRefreshing = false
+            binding?.refreshView?.isRefreshing = false
         }
 
         (activity as? ReadContactsPermissionRequester)?.run {
@@ -200,14 +200,14 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     private fun refreshContactList() {
         viewModel.refreshContactList()
 
-        binding?.contactListRefreshView?.isRefreshing = true
+        binding?.refreshView?.isRefreshing = true
     }
 
     private fun initializeRefreshView() {
-        binding?.contactListRefreshView?.setColorSchemeResources(
+        binding?.refreshView?.setColorSchemeResources(
             R.color.colorPrimary
         )
-        binding?.contactListRefreshView?.setOnRefreshListener {
+        binding?.refreshView?.setOnRefreshListener {
             refreshContactList()
         }
     }
