@@ -5,13 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.entities.ContactEntity
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
+import com.example.domain.interactors.implementations.ContactDetailsAndReminderInteractor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class ContactDetailsViewModel(
-    private val interactor: ContactDetailsInteractor
+    private val interactor: ContactDetailsAndReminderInteractor
 ) : ViewModel() {
     val error: LiveData<Unit>
         get() = mutableError
@@ -41,4 +41,34 @@ class ContactDetailsViewModel(
             }
         }
     }
+
+    fun hasReminder(): Boolean {
+        contact.value?.let {
+            return interactor.hasReminder(it)
+        }
+
+        return false
+    }
+
+    fun setReminder(contactEntity: ContactEntity? = null) =
+        (contactEntity ?: contact.value)?.let {
+            viewModelScope.launch {
+                try {
+                    interactor.setReminder(it)
+                } catch (e: CancellationException) {
+                    Timber.e(e)
+                }
+            }
+        }
+
+    fun clearReminder(contactEntity: ContactEntity? = null) =
+        (contactEntity ?: contact.value)?.let {
+            viewModelScope.launch {
+                try {
+                    interactor.clearReminder(it)
+                } catch (e: CancellationException) {
+                    Timber.e(e)
+                }
+            }
+        }
 }

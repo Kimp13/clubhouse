@@ -1,11 +1,13 @@
 package com.example.clubhouse.modules
 
+import com.example.clubhouse.qualifiers.ContactSharedPreferences
 import com.example.clubhouse.scopes.ServiceScope
-import com.example.domain.interactors.implementations.BirthdayNotificationServiceInteractor
-import com.example.domain.interactors.implementations.RebootReminderServiceInteractor
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
-import com.example.domain.interactors.interfaces.ContactListInteractor
-import com.example.domain.repositories.ContactRepository
+import com.example.domain.interactors.implementations.BirthdayNotificationInteractor
+import com.example.domain.interactors.implementations.RebootReminderInteractor
+import com.example.domain.repositories.interfaces.BasicTypesRepository
+import com.example.domain.repositories.interfaces.ContactRepository
+import com.example.domain.repositories.interfaces.DateTimeRepository
+import com.example.domain.repositories.interfaces.ReminderRepository
 import dagger.Module
 import dagger.Provides
 
@@ -13,17 +15,33 @@ import dagger.Provides
 class ServiceModule {
     @Provides
     @ServiceScope
-    fun provideContactDetailsInteractor(
-        contactRepository: ContactRepository
-    ): ContactDetailsInteractor {
-        return BirthdayNotificationServiceInteractor(contactRepository)
+    fun provideBirthdayNotificationInteractor(
+        contactRepository: ContactRepository,
+        reminderRepository: ReminderRepository,
+        dateTimeRepository: DateTimeRepository
+    ): BirthdayNotificationInteractor {
+        return BirthdayNotificationInteractor(
+            contactRepository,
+            reminderRepository,
+            dateTimeRepository
+        )
     }
 
     @Provides
     @ServiceScope
-    fun provideContactListInteractor(
-        contactRepository: ContactRepository
-    ): ContactListInteractor {
-        return RebootReminderServiceInteractor(contactRepository)
+    fun provideRebootReminderInteractor(
+        contactRepository: ContactRepository,
+        reminderRepository: ReminderRepository,
+        dateTimeRepository: DateTimeRepository,
+
+        @ContactSharedPreferences
+        basicTypesRepository: BasicTypesRepository
+    ): RebootReminderInteractor {
+        return RebootReminderInteractor(
+            contactRepository,
+            reminderRepository,
+            dateTimeRepository,
+            basicTypesRepository
+        )
     }
 }

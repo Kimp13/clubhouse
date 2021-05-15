@@ -7,11 +7,10 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.domain.entities.ContactEntity
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
+import com.example.domain.interactors.implementations.BirthdayNotificationInteractor
 import com.example.presentation.R
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.activities.MainActivity
-import com.example.presentation.ui.delegates.ReminderDelegate
 import com.example.presentation.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -22,7 +21,7 @@ private const val FOREGROUND_NOTIFICATION_ID = -0b1011010
 
 class BirthdayNotificationService : StartedContactService() {
     @Inject
-    lateinit var interactor: ContactDetailsInteractor
+    lateinit var interactor: BirthdayNotificationInteractor
 
     override fun onStartCommand(
         intent: Intent?,
@@ -44,10 +43,7 @@ class BirthdayNotificationService : StartedContactService() {
                     try {
                         interactor.getContact(lookup)?.let { contact ->
                             showBirthdayNotification(contact)
-                            ReminderDelegate.setReminder(
-                                this@BirthdayNotificationService,
-                                contact
-                            )
+                            interactor.setReminder(contact)
                         }
                     } catch (e: CancellationException) {
                         Timber.d("Service job cancelled\n$e")

@@ -1,4 +1,4 @@
-package com.example.domain.repositories
+package com.example.domain.repositories.interfaces
 
 import com.example.domain.entities.LocationEntity
 

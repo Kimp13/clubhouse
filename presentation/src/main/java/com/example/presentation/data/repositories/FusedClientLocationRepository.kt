@@ -2,7 +2,7 @@ package com.example.presentation.data.repositories
 
 import android.content.Context
 import com.example.domain.entities.LocationEntity
-import com.example.domain.repositories.LastLocationRepository
+import com.example.domain.repositories.interfaces.LastLocationRepository
 import com.google.android.gms.location.LocationServices
 import timber.log.Timber
 

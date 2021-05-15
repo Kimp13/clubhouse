@@ -4,19 +4,19 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.example.domain.interactors.implementations.RebootReminderServiceInteractor
+import com.example.domain.interactors.implementations.RebootReminderInteractor
 import com.example.presentation.R
 import com.example.presentation.di.interfaces.AppComponentOwner
-import com.example.presentation.ui.delegates.CONTACT_LOOKUPS_ARRAY_KEY
-import com.example.presentation.ui.delegates.ReminderDelegate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b10010101
 
-abstract class RebootReminderService : StartedContactService() {
-    abstract val interactor: RebootReminderServiceInteractor
+class RebootReminderService : StartedContactService() {
+    @Inject
+    lateinit var interactor: RebootReminderInteractor
 
     override fun onStartCommand(
         intent: Intent?,
@@ -32,28 +32,22 @@ abstract class RebootReminderService : StartedContactService() {
             initializeForeground()
         }
 
-        intent?.extras?.getStringArrayList(CONTACT_LOOKUPS_ARRAY_KEY)
-            ?.let { lookups ->
-                if (checkReadContactsPermission()) {
-                    launch {
-                        try {
-                            interactor.getContacts(lookups).forEach {
-                                ReminderDelegate.setReminder(
-                                    this@RebootReminderService,
-                                    it
-                                )
-                            }
-                        } catch (e: CancellationException) {
-                            Timber.d("Service job cancelled\n$e")
-                        } finally {
-                            stopForeground(true)
-                            stopSelf()
-                        }
+        if (checkReadContactsPermission()) {
+            launch {
+                try {
+                    interactor.getContacts().forEach {
+                        interactor.setReminder(it)
                     }
-
-                    return START_NOT_STICKY
+                } catch (e: CancellationException) {
+                    Timber.e(e)
+                } finally {
+                    stopForeground(true)
+                    stopSelf()
                 }
             }
+
+            return START_NOT_STICKY
+        }
 
         stopForeground(true)
         stopSelf()

@@ -9,7 +9,7 @@ import androidx.core.database.getStringOrNull
 import com.example.domain.entities.BirthDate
 import com.example.domain.entities.ContactEntity
 import com.example.domain.entities.SimpleContactEntity
-import com.example.domain.repositories.ContactRepository
+import com.example.domain.repositories.interfaces.ContactRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

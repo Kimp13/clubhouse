@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.clubhouse.factories.AppViewModelFactory
 import com.example.clubhouse.keys.ViewModelKey
+import com.example.clubhouse.qualifiers.ContactSharedPreferences
 import com.example.clubhouse.scopes.ContactDetailsFragmentScope
-import com.example.domain.interactors.implementations.ContactDetailsFragmentInteractor
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
-import com.example.domain.repositories.ContactRepository
+import com.example.domain.interactors.implementations.ContactDetailsAndReminderInteractor
+import com.example.domain.repositories.interfaces.BasicTypesRepository
+import com.example.domain.repositories.interfaces.ContactRepository
+import com.example.domain.repositories.interfaces.DateTimeRepository
+import com.example.domain.repositories.interfaces.ReminderRepository
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import dagger.Module
 import dagger.Provides
@@ -19,17 +22,27 @@ class ContactDetailsModule {
     @IntoMap
     @ViewModelKey(ContactDetailsViewModel::class)
     fun provideContactDetailsViewModel(
-        interactor: ContactDetailsInteractor
+        interactor: ContactDetailsAndReminderInteractor
     ): ViewModel {
         return ContactDetailsViewModel(interactor)
     }
 
     @Provides
     @ContactDetailsFragmentScope
-    fun provideContactDetailsInteractor(
-        contactRepository: ContactRepository
-    ): ContactDetailsInteractor {
-        return ContactDetailsFragmentInteractor(contactRepository)
+    fun provideContactDetailsFragmentInteractor(
+        contactRepository: ContactRepository,
+        reminderRepository: ReminderRepository,
+        dateTimeRepository: DateTimeRepository,
+
+        @ContactSharedPreferences
+        basicTypesRepository: BasicTypesRepository
+    ): ContactDetailsAndReminderInteractor {
+        return ContactDetailsAndReminderInteractor(
+            contactRepository,
+            reminderRepository,
+            dateTimeRepository,
+            basicTypesRepository
+        )
     }
 
     @Provides
