@@ -33,9 +33,18 @@
         <item name="android:background">@drawable/round_card_background</item>
     </style>
 
+    <style name="MediumIconButton">
+        <item name="android:layout_width">@dimen/mediumIconButtonSide</item>
+        <item name="android:layout_height">@dimen/mediumIconButtonSide</item>
+        <item name="android:background">
+            @drawable/clickable_primary_background_borderless
+        </item>
+        <item name="tint">?attr/colorPrimary</item>
+    </style>
+
     <style name="MapFooterSubmit">
-        <item name="android:layout_width">@dimen/iconButtonSide</item>
-        <item name="android:layout_height">@dimen/iconButtonSide</item>
+        <item name="android:layout_width">@dimen/bigIconButtonSide</item>
+        <item name="android:layout_height">@dimen/bigIconButtonSide</item>
         <item name="android:layout_marginStart">@dimen/mapFooterGap</item>
     </style>
 

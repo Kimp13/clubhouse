@@ -44,4 +44,7 @@
         Нажимайте на карту, чтобы выбрать местоположение.
     </string>
     <string name="clarify_card_controls_ok">Ясно!</string>
+    <string name="edit_location">Редактировать местоположение</string>
+    <string name="view_location">Посмотреть местоположение</string>
+    <string name="view_all_contacts_locations">Посмотреть местоположения всех контактов</string>
 </resources>

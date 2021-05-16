@@ -6,8 +6,13 @@
     android:padding="@dimen/cardPadding">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/clickable_primary_background"
         android:gravity="center_horizontal"
-        android:text="@string/hello_world" />
+        android:text="@string/view_all_contacts_locations"
+        android:textAppearance="?attr/textAppearanceHeadline5"
+        android:textColor="?attr/colorPrimary"
+        android:textStyle="bold" />
 </FrameLayout>

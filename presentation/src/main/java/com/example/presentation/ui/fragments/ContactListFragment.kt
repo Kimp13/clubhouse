@@ -21,6 +21,7 @@ import com.example.presentation.ui.adapters.decorations.ContactListDecoration
 import com.example.presentation.ui.adapters.decorations.ContactListDecorationProperties
 import com.example.presentation.ui.adapters.items.ContactListItem
 import com.example.presentation.ui.interfaces.ContactCardClickListener
+import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
 import com.example.presentation.ui.viewmodels.ContactListViewModel
 import javax.inject.Inject
@@ -32,6 +33,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private var cardClickListener: ContactCardClickListener? = null
+    private var locationViewer: ContactLocationViewer? = null
     private var viewAdapter: ContactAdapter? = null
     private var binding: FragmentContactListBinding? = null
     private lateinit var recyclerViewDecoration: ContactListDecoration
@@ -46,6 +48,10 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
 
         if (context is ContactCardClickListener) {
             cardClickListener = context
+        }
+
+        if (context is ContactLocationViewer) {
+            locationViewer = context
         }
 
         recyclerViewDecoration = ContactListDecoration(
@@ -149,7 +155,9 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
 
     private fun initializeRecyclerView() {
         binding?.recyclerView?.run {
-            viewAdapter = ContactAdapter {
+            viewAdapter = ContactAdapter({
+                locationViewer?.viewAllContactsLocation()
+            }) {
                 cardClickListener?.onCardClick(it.lookup)
             }
 

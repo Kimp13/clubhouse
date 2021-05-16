@@ -8,5 +8,7 @@ interface LocationRepository {
 
     suspend fun addContactLocation(location: ContactLocation)
 
+    suspend fun getAll(): List<ContactLocation>
+
     fun getUserLastLocation(onSuccess: (LocationEntity?) -> Unit)
 }

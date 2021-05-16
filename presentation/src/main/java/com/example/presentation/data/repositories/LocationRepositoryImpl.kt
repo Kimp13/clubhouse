@@ -46,4 +46,9 @@ class LocationRepositoryImpl(
             Timber.e(e)
         }
     }
+
+    override suspend fun getAll(): List<ContactLocation> {
+        return contactLocationDao.getAll()
+            .map { it.toDomainEntity() }
+    }
 }
