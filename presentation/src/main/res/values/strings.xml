@@ -54,4 +54,7 @@
         Tap the map to choose a location.
     </string>
     <string name="clarify_card_controls_ok">Clear!</string>
+    <string name="edit_location">Edit location</string>
+    <string name="view_location">View location</string>
+    <string name="view_all_contacts_locations">View all contacts\' locations</string>
 </resources>

@@ -8,6 +8,9 @@ import com.example.presentation.data.entities.SavedContactLocation
 
 @Dao
 interface ContactLocationDao {
+    @Query("select * from contact_location")
+    suspend fun getAll(): List<SavedContactLocation>
+
     @Query("select * from contact_location where contact_id = :contactId")
     suspend fun findById(contactId: Long): SavedContactLocation?
 

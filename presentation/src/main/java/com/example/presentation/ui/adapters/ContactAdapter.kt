@@ -42,16 +42,19 @@ object ContactDiffCallback : DiffUtil.ItemCallback<ContactListItem>() {
 }
 
 class ContactAdapter(
-    private val clickListener: (SimpleContactEntity) -> Unit
+    private val headerClickListener: () -> Unit,
+    private val contactCardClickListener: (SimpleContactEntity) -> Unit
 ) : AsyncListDifferDelegationAdapter<ContactListItem>(ContactDiffCallback) {
     init {
-        delegatesManager.addDelegate(contactHeaderDelegate())
+        delegatesManager.addDelegate(contactHeaderDelegate {
+            headerClickListener()
+        })
         delegatesManager.addDelegate(contactProgressDelegate())
         delegatesManager.addDelegate(contactErrorDelegate())
         delegatesManager.addDelegate(contactEntityDelegate { position ->
             (items[position] as? ContactListItem.Entity)
                 ?.let { item ->
-                    clickListener(item.contact)
+                    contactCardClickListener(item.contact)
                 }
         })
         delegatesManager.addDelegate(contactFooterDelegate())

@@ -8,5 +8,9 @@ interface ContactRepository {
 
     suspend fun getContacts(lookups: List<String?>): List<ContactEntity>
 
+    suspend fun findContactsById(ids: List<Long>): List<ContactEntity>
+
     suspend fun getContact(lookup: String): ContactEntity?
+
+    suspend fun findContactById(id: Long): ContactEntity?
 }

@@ -30,6 +30,7 @@ import javax.inject.Inject
 const val CONTACT_LOCATION_FRAGMENT_TAG = "fragment_contact_location"
 const val CONTACT_ARG_ID = "argument_id"
 const val CONTACT_ARG_LOCATION = "argument_location"
+const val MAP_CAMERA_ZOOM_TERM = -7.5F
 
 private const val BELOVED_COMPANY_LATITUDE = 56.8463985
 private const val BELOVED_COMPANY_LONGITUDE = 53.2332288
@@ -87,14 +88,11 @@ class ContactLocationFragment :
                 as? SupportMapFragment)?.getMapAsync(this)
 
         (activity as? AppCompatActivity)?.supportActionBar?.run {
-            setTitle(
-                R.string.contact_location
-            )
+            setTitle(R.string.edit_location)
             setDisplayHomeAsUpEnabled(true)
         }
 
         binding = FragmentContactLocationBinding.bind(view)
-
     }
 
     override fun onMapReady(map: GoogleMap?) {
@@ -175,7 +173,7 @@ class ContactLocationFragment :
                 CameraUpdateFactory.newCameraPosition(
                     CameraPosition.Builder()
                         .target(point)
-                        .zoom(maxZoomLevel - 7.5F)
+                        .zoom(maxZoomLevel + MAP_CAMERA_ZOOM_TERM)
                         .build()
                 )
             )

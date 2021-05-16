@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.example.domain.interactors.implementations.RebootReminderServiceInteractor
+import com.example.domain.interactors.implementations.RebootReminderInteractor
 import com.example.presentation.R
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.delegates.CONTACT_LOOKUPS_ARRAY_KEY
@@ -16,7 +16,7 @@ import timber.log.Timber
 private const val FOREGROUND_NOTIFICATION_ID = -0b10010101
 
 abstract class RebootReminderService : StartedContactService() {
-    abstract val interactor: RebootReminderServiceInteractor
+    abstract val interactor: RebootReminderInteractor
 
     override fun onStartCommand(
         intent: Intent?,
