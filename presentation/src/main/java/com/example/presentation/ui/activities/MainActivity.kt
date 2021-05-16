@@ -24,9 +24,12 @@ import com.example.presentation.ui.fragments.ContactLocationFragment
 import com.example.presentation.ui.fragments.REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.RequestPermissionDialogFragment
 import com.example.presentation.ui.fragments.RequestReadContactsPermissionFragment
+import com.example.presentation.ui.fragments.VIEW_CONTACT_LOCATION_FRAGMENT_TAG
+import com.example.presentation.ui.fragments.ViewContactLocationFragment
 import com.example.presentation.ui.interfaces.AccessLocationPermissionRequester
 import com.example.presentation.ui.interfaces.ContactCardClickListener
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
+import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.PoppableBackStackOwner
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
 import com.example.presentation.ui.interfaces.RequestPermissionDialogDismissListener
@@ -38,6 +41,7 @@ class MainActivity :
     AppCompatActivity(),
     ContactCardClickListener,
     ContactLocationRetriever,
+    ContactLocationViewer,
     PoppableBackStackOwner,
     AccessLocationPermissionRequester,
     ReadContactsPermissionRequester,
@@ -130,6 +134,22 @@ class MainActivity :
         changeFragment(
             ContactLocationFragment.newInstance(contact),
             CONTACT_LOCATION_FRAGMENT_TAG,
+            true
+        )
+    }
+
+    override fun viewContactLocation(contactEntity: ContactEntity) {
+        changeFragment(
+            ViewContactLocationFragment.newInstance(contactEntity.id),
+            VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
+            true
+        )
+    }
+
+    override fun viewAllContactsLocation() {
+        changeFragment(
+            ViewContactLocationFragment(),
+            VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
             true
         )
     }

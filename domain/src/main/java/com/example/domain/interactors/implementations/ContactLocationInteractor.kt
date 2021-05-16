@@ -2,15 +2,11 @@ package com.example.domain.interactors.implementations
 
 import com.example.domain.entities.ContactLocation
 import com.example.domain.entities.LocationEntity
-import com.example.domain.interactors.interfaces.ContactLocationStorageInteractor
 import com.example.domain.interactors.interfaces.LocationInteractor
 import com.example.domain.interactors.interfaces.MapControlsClarificationInteractor
-import com.example.domain.interactors.interfaces.UserLastLocationInteractor
 import com.example.domain.repositories.BasicTypesRepository
-import com.example.domain.repositories.LocationRepository
-import com.example.domain.repositories.LastLocationRepository
-import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
+import com.example.domain.repositories.LocationRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.LastLocationRepository
 
@@ -23,7 +19,7 @@ class ContactLocationInteractor(
 ) : LocationInteractor,
     MapControlsClarificationInteractor {
     override fun getLastLocation(onSuccess: (LocationEntity?) -> Unit) {
-        locationRepository.getLastLocation(onSuccess)
+        locationRepository.getUserLastLocation(onSuccess)
     }
 
     override suspend fun areMapControlsClarified() =

@@ -130,21 +130,34 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:layout_constrainedWidth="true"
-                app:layout_constraintBottom_toBottomOf="@id/editLocation"
-                app:layout_constraintEnd_toStartOf="@id/editLocation"
+                app:layout_constraintEnd_toStartOf="@id/viewLocation"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/editLocation" />
+                app:layout_constraintTop_toBottomOf="@id/remindSwitch" />
 
-            <Button
-                android:id="@+id/editLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/cardInnerGap"
+            <ImageView
+                android:id="@+id/viewLocation"
+                style="@style/MediumIconButton"
+                android:contentDescription="@string/view_location"
+                android:src="@drawable/ic_baseline_visibility_24"
                 android:visibility="gone"
                 app:layout_constrainedWidth="true"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/locationDescription"
+                app:layout_constraintEnd_toStartOf="@id/editLocation"
                 app:layout_constraintStart_toEndOf="@id/locationDescription"
-                app:layout_constraintTop_toBottomOf="@id/remindSwitch" />
+                app:layout_constraintTop_toTopOf="@id/locationDescription" />
+
+            <ImageView
+                android:id="@+id/editLocation"
+                style="@style/MediumIconButton"
+                android:contentDescription="@string/edit_location"
+                android:src="@drawable/ic_baseline_edit_24"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/locationDescription"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/viewLocation"
+                app:layout_constraintTop_toTopOf="@id/locationDescription" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

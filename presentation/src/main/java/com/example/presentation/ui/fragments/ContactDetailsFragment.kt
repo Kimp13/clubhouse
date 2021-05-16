@@ -19,6 +19,7 @@ import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.delegates.ContactPhotoDelegate
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
+import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import javax.inject.Inject
@@ -45,6 +46,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
     private var locationRetriever: ContactLocationRetriever? = null
+    private var locationViewer: ContactLocationViewer? = null
     private var isReminded: Boolean = false
         set(value) {
             field = value
@@ -64,6 +66,10 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         if (context is ContactLocationRetriever) {
             locationRetriever = context
+        }
+
+        if (context is ContactLocationViewer) {
+            locationViewer = context
         }
     }
 
@@ -102,6 +108,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
     override fun onDetach() {
         locationRetriever = null
+        locationViewer = null
 
         super.onDetach()
     }
@@ -209,6 +216,9 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             editLocation.setOnClickListener {
                 locationRetriever?.retrieveContactLocation(contact)
             }
+            viewLocation.setOnClickListener {
+                locationViewer?.viewContactLocation(contact)
+            }
 
             contact.location?.run {
                 locationDescription.text = description ?: getString(
@@ -216,12 +226,12 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                     latitude,
                     longitude
                 )
-                editLocation.text = getString(R.string.change)
+                viewLocation.visibility = View.VISIBLE
             } ?: run {
                 locationDescription.text = getString(
                     R.string.no_location_set
                 )
-                editLocation.text = getString(R.string.set)
+                viewLocation.visibility = View.GONE
             }
         }
     }
