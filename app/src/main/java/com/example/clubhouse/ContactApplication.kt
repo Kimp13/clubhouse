@@ -6,6 +6,7 @@ import com.example.clubhouse.components.AnnotatedContactListFragmentComponent
 import com.example.clubhouse.components.AnnotatedContactLocationFragmentComponent
 import com.example.clubhouse.components.AnnotatedServiceComponent
 import com.example.clubhouse.modules.AppModule
+import com.example.clubhouse.modules.NetworkModule
 import com.example.clubhouse.modules.RepositoryModule
 import com.example.presentation.di.components.ApplicationComponent
 import com.example.presentation.di.interfaces.AppComponentOwner
@@ -15,7 +16,11 @@ import timber.log.Timber.DebugTree
 import javax.inject.Singleton
 
 @Component(
-    modules = [AppModule::class, RepositoryModule::class]
+    modules = [
+        AppModule::class,
+        RepositoryModule::class,
+        NetworkModule::class
+    ]
 )
 @Singleton
 interface AnnotatedApplicationComponent : ApplicationComponent {
