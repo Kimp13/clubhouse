@@ -29,6 +29,12 @@ android {
                 'GOOGLE_GEOCODING_URI',
                 '"https://maps.googleapis.com/maps/api/geocode/"'
         )
+
+        buildConfigField(
+                'String',
+                'GOOGLE_DIRECTIONS_API',
+                '"https://maps.googleapis.com/maps/api/directions/"'
+        )
     }
 
     buildTypes {

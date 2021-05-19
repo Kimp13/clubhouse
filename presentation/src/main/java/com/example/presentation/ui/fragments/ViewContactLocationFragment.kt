@@ -22,8 +22,7 @@ import javax.inject.Inject
 import kotlin.math.min
 
 const val VIEW_CONTACT_LOCATION_FRAGMENT_TAG = "fragment_view_contact_location"
-
-private const val BOUNDS_PADDING = 100
+const val MAP_BOUNDS_PADDING = 100
 
 class ViewContactLocationFragment :
     Fragment(R.layout.fragment_view_contact_location),
@@ -97,7 +96,7 @@ class ViewContactLocationFragment :
             map?.moveCamera(
                 CameraUpdateFactory.newLatLngBounds(
                     boundsBuilder.build(),
-                    BOUNDS_PADDING
+                    MAP_BOUNDS_PADDING
                 )
             )
 

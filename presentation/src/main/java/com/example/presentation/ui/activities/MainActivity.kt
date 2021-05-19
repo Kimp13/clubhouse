@@ -14,13 +14,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.domain.entities.ContactEntity
 import com.example.presentation.R
+import com.example.presentation.data.entities.ParcelableSimpleContact
 import com.example.presentation.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.presentation.ui.fragments.CONTACT_DETAILS_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.CONTACT_LIST_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.CONTACT_LOCATION_FRAGMENT_TAG
+import com.example.presentation.ui.fragments.CONTACT_NAVIGATION_LIST_FRAGMENT_TAG
+import com.example.presentation.ui.fragments.CONTACT_NAVIGATOR_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.ContactDetailsFragment
 import com.example.presentation.ui.fragments.ContactListFragment
 import com.example.presentation.ui.fragments.ContactLocationFragment
+import com.example.presentation.ui.fragments.ContactNavigationListFragment
+import com.example.presentation.ui.fragments.ContactNavigatorFragment
 import com.example.presentation.ui.fragments.REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.RequestPermissionDialogFragment
 import com.example.presentation.ui.fragments.RequestReadContactsPermissionFragment
@@ -28,6 +33,7 @@ import com.example.presentation.ui.fragments.VIEW_CONTACT_LOCATION_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.ViewContactLocationFragment
 import com.example.presentation.ui.interfaces.AccessLocationPermissionRequester
 import com.example.presentation.ui.interfaces.ContactCardClickListener
+import com.example.presentation.ui.interfaces.ContactLocationNavigator
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
 import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.PoppableBackStackOwner
@@ -42,6 +48,7 @@ class MainActivity :
     ContactCardClickListener,
     ContactLocationRetriever,
     ContactLocationViewer,
+    ContactLocationNavigator,
     PoppableBackStackOwner,
     AccessLocationPermissionRequester,
     ReadContactsPermissionRequester,
@@ -142,6 +149,25 @@ class MainActivity :
         changeFragment(
             ViewContactLocationFragment.newInstance(contactEntity.id),
             VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
+            true
+        )
+    }
+
+    override fun navigateFrom(contact: ContactEntity) {
+        changeFragment(
+            ContactNavigationListFragment.newInstance(contact),
+            CONTACT_NAVIGATION_LIST_FRAGMENT_TAG,
+            true
+        )
+    }
+
+    override fun navigate(
+        from: ParcelableSimpleContact,
+        to: ParcelableSimpleContact
+    ) {
+        changeFragment(
+            ContactNavigatorFragment.newInstance(from, to),
+            CONTACT_NAVIGATOR_FRAGMENT_TAG,
             true
         )
     }

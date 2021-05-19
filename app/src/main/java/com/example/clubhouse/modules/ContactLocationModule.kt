@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.clubhouse.factories.AppViewModelFactory
 import com.example.clubhouse.keys.ViewModelKey
 import com.example.clubhouse.scopes.ContactLocationFragmentScope
-import com.example.domain.interactors.implementations.ContactLocationInteractor
+import com.example.domain.interactors.implementations.LocationInteractor
 import com.example.domain.repositories.BasicTypesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.LocationRepository
@@ -20,7 +20,7 @@ class ContactLocationModule {
     @IntoMap
     @ViewModelKey(ContactLocationViewModel::class)
     fun provideContactLocationViewModel(
-        interactor: ContactLocationInteractor
+        interactor: LocationInteractor
     ): ViewModel {
         return ContactLocationViewModel(interactor)
     }
@@ -39,8 +39,8 @@ class ContactLocationModule {
         locationRepository: LocationRepository,
         basicTypesRepository: BasicTypesRepository,
         geocodingRepository: GeocodingRepository
-    ): ContactLocationInteractor {
-        return ContactLocationInteractor(
+    ): LocationInteractor {
+        return LocationInteractor(
             locationRepository,
             basicTypesRepository,
             geocodingRepository

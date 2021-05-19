@@ -65,6 +65,9 @@ dependencies {
     /* Dagger */
     implementation "com.google.dagger:dagger:$dagger_version"
 
+    /* Google Maps */
+     implementation 'com.google.maps.android:maps-utils-ktx:2.4.0'
+
     /* Google Play services */
     implementation 'com.google.android.gms:play-services-location:18.0.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.1'

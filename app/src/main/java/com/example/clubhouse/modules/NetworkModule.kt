@@ -1,7 +1,9 @@
 package com.example.clubhouse.modules
 
 import com.example.clubhouse.BuildConfig
+import com.example.presentation.data.apis.DirectionsApi
 import com.example.presentation.data.apis.GeocodingApi
+import com.example.presentation.data.interceptors.DirectionsInterceptor
 import com.example.presentation.data.interceptors.GeocodingInterceptor
 import com.google.gson.Gson
 import dagger.Module
@@ -21,10 +23,9 @@ class NetworkModule {
     @Singleton
     fun provideGeocodingApi(
         gson: Gson
-    ) = Retrofit.Builder()
+    ): GeocodingApi = Retrofit.Builder()
         .client(
-            OkHttpClient
-                .Builder()
+            OkHttpClient.Builder()
                 .addInterceptor(GeocodingInterceptor())
                 .build()
         )
@@ -32,4 +33,19 @@ class NetworkModule {
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
         .create(GeocodingApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDirectionsApi(
+        gson: Gson
+    ): DirectionsApi = Retrofit.Builder()
+        .client(
+            OkHttpClient.Builder()
+                .addInterceptor(DirectionsInterceptor())
+                .build()
+        )
+        .baseUrl(BuildConfig.GOOGLE_DIRECTIONS_API)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+        .create(DirectionsApi::class.java)
 }
