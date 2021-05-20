@@ -3,30 +3,21 @@ package com.example.clubhouse.modules
 import android.content.Context
 import com.example.clubhouse.qualifiers.CommonSharedPreferences
 import com.example.clubhouse.qualifiers.ContactSharedPreferences
-import com.example.domain.repositories.BasicTypesRepository
-import com.example.domain.repositories.ContactRepository
 import com.example.domain.repositories.LocationRepository
 import com.example.presentation.data.daos.ContactLocationDao
-import com.example.domain.repositories.LastLocationRepository
-import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.implementations.DateTimeRepositoryImpl
 import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.ContactRepository
 import com.example.domain.repositories.interfaces.DateTimeRepository
-import com.example.domain.repositories.interfaces.LastLocationRepository
 import com.example.domain.repositories.interfaces.ReminderRepository
 import com.example.presentation.data.apis.GeocodingApi
-import com.example.presentation.data.daos.ContactLocationDao
-import com.example.presentation.data.repositories.CommonSharedPreferencesRepository
 import com.example.presentation.data.repositories.AlarmRepository
 import com.example.presentation.data.repositories.COMMON_SHARED_PREFERENCES_KEY
 import com.example.presentation.data.repositories.CONTACT_SHARED_PREFERENCES_KEY
 import com.example.presentation.data.repositories.ContactProviderRepository
 import com.example.presentation.data.repositories.GoogleGeocodingRepository
 import com.example.presentation.data.repositories.LocationRepositoryImpl
-import com.example.presentation.data.repositories.FusedClientLocationRepository
-import com.example.presentation.data.repositories.GoogleGeocodingRepository
 import com.example.presentation.data.repositories.UniversalSharedPreferencesRepository
 import dagger.Module
 import dagger.Provides
@@ -75,6 +66,8 @@ class RepositoryModule {
     fun provideDateTimeRepository(): DateTimeRepository =
         DateTimeRepositoryImpl()
 
+    @Provides
+    @Singleton
     fun provideLocationRepository(
         context: Context,
         contactLocationDao: ContactLocationDao

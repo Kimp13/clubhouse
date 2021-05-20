@@ -23,8 +23,6 @@ import kotlin.math.min
 
 const val VIEW_CONTACT_LOCATION_FRAGMENT_TAG = "fragment_view_contact_location"
 
-private const val BOUNDS_PADDING = 100
-
 class ViewContactLocationFragment :
     Fragment(R.layout.fragment_view_contact_location),
     OnMapReadyCallback {
@@ -87,7 +85,7 @@ class ViewContactLocationFragment :
                                     contact.location
                                         ?.description
                                         ?.let {
-                                            name?.plus("\n$it")
+                                            name?.plus(": $it")
                                         } ?: name
                                 })
                         )
@@ -97,7 +95,9 @@ class ViewContactLocationFragment :
             map?.moveCamera(
                 CameraUpdateFactory.newLatLngBounds(
                     boundsBuilder.build(),
-                    BOUNDS_PADDING
+                    resources.getDimensionPixelOffset(
+                        R.dimen.mapBoundsPadding
+                    )
                 )
             )
 

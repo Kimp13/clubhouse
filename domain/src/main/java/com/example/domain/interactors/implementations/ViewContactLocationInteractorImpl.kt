@@ -1,8 +1,8 @@
 package com.example.domain.interactors.implementations
 
 import com.example.domain.interactors.interfaces.ViewContactLocationInteractor
-import com.example.domain.repositories.ContactRepository
 import com.example.domain.repositories.LocationRepository
+import com.example.domain.repositories.interfaces.ContactRepository
 
 class ViewContactLocationInteractorImpl(
     private val contactRepository: ContactRepository,

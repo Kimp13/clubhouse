@@ -3,6 +3,7 @@ package com.example.domain.interactors.implementations
 import com.example.domain.entities.ContactEntity
 import com.example.domain.interactors.interfaces.ContactDetailsInteractor
 import com.example.domain.interactors.interfaces.ReminderInteractor
+import com.example.domain.repositories.LocationRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.ContactRepository
 import com.example.domain.repositories.interfaces.DateTimeRepository
@@ -12,11 +13,16 @@ open class ContactDetailsAndReminderInteractor(
     private val contactRepository: ContactRepository,
     private val reminderRepository: ReminderRepository,
     private val dateTimeRepository: DateTimeRepository,
-    private val basicTypesRepository: BasicTypesRepository
+    private val basicTypesRepository: BasicTypesRepository,
+    private val locationRepository: LocationRepository
 ) : ContactDetailsInteractor,
     ReminderInteractor {
     override suspend fun getContact(lookup: String) =
-        contactRepository.getContact(lookup)
+        contactRepository.getContact(lookup)?.run {
+            copy(
+                location = locationRepository.findContactLocationById(id)
+            )
+        }
 
     override suspend fun setReminder(contact: ContactEntity) {
         contact.birthDate?.let {

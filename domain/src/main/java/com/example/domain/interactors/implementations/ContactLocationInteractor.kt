@@ -4,11 +4,9 @@ import com.example.domain.entities.ContactLocation
 import com.example.domain.entities.LocationEntity
 import com.example.domain.interactors.interfaces.LocationInteractor
 import com.example.domain.interactors.interfaces.MapControlsClarificationInteractor
-import com.example.domain.repositories.BasicTypesRepository
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.LocationRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
-import com.example.domain.repositories.interfaces.LastLocationRepository
 
 private const val ARE_MAP_CONTROLS_CLARIFIED_KEY = "are_map_controls_clarified?"
 

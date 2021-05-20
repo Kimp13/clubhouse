@@ -8,11 +8,6 @@ import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.ContactRepository
 import com.example.domain.repositories.interfaces.DateTimeRepository
 import com.example.domain.repositories.interfaces.ReminderRepository
-import com.example.domain.interactors.implementations.BirthdayNotificationInteractor
-import com.example.domain.interactors.implementations.RebootReminderInteractor
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
-import com.example.domain.interactors.interfaces.LookupContactListInteractor
-import com.example.domain.repositories.ContactRepository
 import dagger.Module
 import dagger.Provides
 

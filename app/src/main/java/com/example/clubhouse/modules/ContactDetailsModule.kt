@@ -11,9 +11,6 @@ import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.ContactRepository
 import com.example.domain.repositories.interfaces.DateTimeRepository
 import com.example.domain.repositories.interfaces.ReminderRepository
-import com.example.domain.interactors.implementations.ContactDetailsInteractorImpl
-import com.example.domain.interactors.interfaces.ContactDetailsInteractor
-import com.example.domain.repositories.ContactRepository
 import com.example.domain.repositories.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import dagger.Module

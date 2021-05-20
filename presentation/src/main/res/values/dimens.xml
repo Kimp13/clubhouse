@@ -11,4 +11,5 @@
     <dimen name="mediumIconButtonSide">30dp</dimen>
     <dimen name="cardInnerGap">8dp</dimen>
     <dimen name="mapFooterGap">@dimen/cardInnerGap</dimen>
+    <dimen name="mapBoundsPadding">20dp</dimen>
 </resources>
