@@ -19,6 +19,7 @@ import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.delegates.ContactPhotoDelegate
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
+import com.example.presentation.ui.interfaces.ContactLocationViewer
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import javax.inject.Inject
@@ -45,6 +46,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
     private var locationRetriever: ContactLocationRetriever? = null
+    private var locationViewer: ContactLocationViewer? = null
     private var isReminded: Boolean = false
         set(value) {
             field = value
@@ -64,6 +66,10 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         if (context is ContactLocationRetriever) {
             locationRetriever = context
+        }
+
+        if (context is ContactLocationViewer) {
+            locationViewer = context
         }
     }
 
@@ -87,7 +93,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         inflater.inflate(R.menu.fragment_contact_details_menu, menu)
         menu.findItem(R.id.menuRefresh).setOnMenuItemClickListener {
-            binding?.contactDetailsRefreshView?.isRefreshing = true
+            binding?.refreshView?.isRefreshing = true
             refreshContactDetails()
 
             true
@@ -102,6 +108,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
     override fun onDetach() {
         locationRetriever = null
+        locationViewer = null
 
         super.onDetach()
     }
@@ -117,14 +124,14 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
         contactEntity = contact
 
         binding?.run {
-            if (!contactDetailsRefreshView.isEnabled) {
-                contactDetailsRefreshView.isEnabled = true
-                contactDetailsContents.removeView(
-                    contactDetailsProgressGroup
+            if (!refreshView.isEnabled) {
+                refreshView.isEnabled = true
+                contents.removeView(
+                    progressGroup
                 )
             }
 
-            contactDetailsPhoto.run {
+            photo.run {
                 visibility = View.VISIBLE
 
                 contact.photoId?.let {
@@ -141,20 +148,20 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                 }
             }
 
-            contactDetailsName.text =
+            name.text =
                 contact.name ?: getString(R.string.no_name)
-            contactDetailsName.visibility = View.VISIBLE
+            name.visibility = View.VISIBLE
 
-            contactDetailsDescription.text =
+            description.text =
                 contact.description ?: getString(R.string.no_description)
-            contactDetailsDescription.visibility = View.VISIBLE
+            description.visibility = View.VISIBLE
 
             val phonesIterator = contact.phones.listIterator()
             val emailsIterator = contact.emails.listIterator()
 
             listOf(
-                contactDetailsPhone1,
-                contactDetailsPhone2
+                phone1,
+                phone2
             ).forEach {
                 if (phonesIterator.hasNext()) {
                     it.text = phonesIterator.next()
@@ -165,8 +172,8 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             }
 
             listOf(
-                contactDetailsEmail1,
-                contactDetailsEmail2
+                email1,
+                email2
             ).forEach {
                 if (emailsIterator.hasNext()) {
                     it.text = emailsIterator.next()
@@ -177,10 +184,10 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             }
 
             contact.birthDate?.run {
-                contactDetailsBirthDate.visibility = View.VISIBLE
-                contactDetailsRemindTextView.visibility = View.VISIBLE
+                birthDate.visibility = View.VISIBLE
+                clarifyRemind.visibility = View.VISIBLE
 
-                contactDetailsRemindSwitch.run {
+                remindSwitch.run {
                     visibility = View.VISIBLE
                     isChecked = isReminded
 
@@ -189,7 +196,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                     }
                 }
 
-                contactDetailsBirthDate.text = getString(
+                birthDate.text = getString(
                     R.string.birthday_fmt,
                     DateUtils.formatDateTime(
                         requireContext(),
@@ -199,45 +206,48 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
                     )
                 )
             } ?: run {
-                contactDetailsBirthDate.visibility = View.GONE
-                contactDetailsRemindTextView.visibility = View.GONE
-                contactDetailsRemindSwitch.visibility = View.GONE
+                birthDate.visibility = View.GONE
+                clarifyRemind.visibility = View.GONE
+                remindSwitch.visibility = View.GONE
             }
 
-            contactDetailsLocationTextView.visibility = View.VISIBLE
-            contactDetailsLocationButton.visibility = View.VISIBLE
-            contactDetailsLocationButton.setOnClickListener {
+            locationDescription.visibility = View.VISIBLE
+            editLocation.visibility = View.VISIBLE
+            editLocation.setOnClickListener {
                 locationRetriever?.retrieveContactLocation(contact)
+            }
+            viewLocation.setOnClickListener {
+                locationViewer?.viewContactLocation(contact)
             }
 
             contact.location?.run {
-                contactDetailsLocationTextView.text = description ?: getString(
+                locationDescription.text = description ?: getString(
                     R.string.location_fmt,
                     latitude,
                     longitude
                 )
-                contactDetailsLocationButton.text = getString(R.string.change)
+                viewLocation.visibility = View.VISIBLE
             } ?: run {
-                contactDetailsLocationTextView.text = getString(
+                locationDescription.text = getString(
                     R.string.no_location_set
                 )
-                contactDetailsLocationButton.text = getString(R.string.set)
+                viewLocation.visibility = View.GONE
             }
         }
     }
 
     private fun updateUI() {
         viewModel.error.observe(viewLifecycleOwner) {
-            binding?.contactDetailsContents?.children?.forEach {
+            binding?.contents?.children?.forEach {
                 it.visibility = View.GONE
             }
-            binding?.contactDetailsErrorGroup?.visibility = View.VISIBLE
+            binding?.errorGroup?.visibility = View.VISIBLE
         }
 
         viewModel.contact.observe(viewLifecycleOwner) { contact ->
             updateContact(contact)
 
-            binding?.contactDetailsRefreshView?.isRefreshing = false
+            binding?.refreshView?.isRefreshing = false
         }
 
         (activity as? ReadContactsPermissionRequester)?.run {
@@ -256,7 +266,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     }
 
     private fun initializeRefreshView() {
-        binding?.contactDetailsRefreshView?.run {
+        binding?.refreshView?.run {
             setColorSchemeResources(
                 R.color.colorPrimary
             )

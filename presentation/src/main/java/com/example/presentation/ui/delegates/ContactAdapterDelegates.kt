@@ -1,6 +1,7 @@
 package com.example.presentation.ui.delegates
 
 import android.content.res.ColorStateList
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -8,10 +9,17 @@ import com.example.presentation.R
 import com.example.presentation.ui.adapters.items.ContactListItem
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegate
 
-fun contactHeaderDelegate() =
-    adapterDelegate<ContactListItem.Header, ContactListItem>(
-        R.layout.contact_list_header
-    ) {}
+fun contactHeaderDelegate(
+    clickListener: () -> Unit
+) = adapterDelegate<ContactListItem.Header, ContactListItem>(
+    R.layout.contact_list_header
+) {
+    val textView: View = findViewById(R.id.textView)
+
+    textView.setOnClickListener {
+        clickListener()
+    }
+}
 
 fun contactProgressDelegate() =
     adapterDelegate<ContactListItem.Progress, ContactListItem>(

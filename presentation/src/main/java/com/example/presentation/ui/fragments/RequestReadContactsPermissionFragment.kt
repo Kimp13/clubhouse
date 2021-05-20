@@ -67,7 +67,7 @@ class RequestReadContactsPermissionFragment : Fragment(
         FragmentRequestReadContactsPermissionBinding
             .bind(view)
             .run {
-                requestPermissionsButton.setOnClickListener {
+                submit.setOnClickListener {
                     startActivity(
                         Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS

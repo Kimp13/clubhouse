@@ -9,7 +9,7 @@ import com.example.clubhouse.scopes.ContactLocationFragmentScope
 import com.example.domain.interactors.implementations.ContactLocationInteractor
 import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
-import com.example.domain.repositories.interfaces.LastLocationRepository
+import com.example.domain.repositories.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import dagger.Module
 import dagger.Provides
@@ -37,7 +37,7 @@ class ContactLocationModule {
     @Provides
     @ContactLocationFragmentScope
     fun provideLocationInteractor(
-        locationRepository: LastLocationRepository,
+        locationRepository: LocationRepository,
         geocodingRepository: GeocodingRepository,
 
         @CommonSharedPreferences

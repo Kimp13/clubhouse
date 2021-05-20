@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/contactLocationMap"
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -20,7 +20,7 @@
         android:padding="@dimen/mapFooterGap">
 
         <com.example.presentation.ui.views.EllipsizedTextView
-            android:id="@+id/contactLocationTextView"
+            android:id="@id/locationDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -28,7 +28,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <ImageView
-            android:id="@+id/contactLocationSubmit"
+            android:id="@+id/submit"
             style="@style/MapFooterSubmit"
             android:background="@drawable/clickable_primary_background_borderless"
             android:clickable="true"
@@ -39,7 +39,7 @@
             app:tint="?attr/colorPrimary" />
 
         <ProgressBar
-            android:id="@+id/contactLocationProgressBar"
+            android:id="@+id/progressBar"
             style="@style/MapFooterSubmit"
             android:visibility="gone" />
     </LinearLayout>
