@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.clubhouse.factories.AppViewModelFactory
 import com.example.clubhouse.keys.ViewModelKey
+import com.example.clubhouse.qualifiers.CommonSharedPreferences
 import com.example.clubhouse.scopes.ContactLocationFragmentScope
 import com.example.domain.interactors.implementations.ContactLocationInteractor
-import com.example.domain.repositories.LastLocationRepository
-import com.example.domain.repositories.SharedPreferencesRepository
 import com.example.domain.repositories.GeocodingRepository
+import com.example.domain.repositories.interfaces.BasicTypesRepository
+import com.example.domain.repositories.interfaces.LastLocationRepository
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import dagger.Module
 import dagger.Provides
@@ -37,12 +38,14 @@ class ContactLocationModule {
     @ContactLocationFragmentScope
     fun provideLocationInteractor(
         locationRepository: LastLocationRepository,
-        sharedPreferencesRepository: SharedPreferencesRepository,
-        geocodingRepository: GeocodingRepository
+        geocodingRepository: GeocodingRepository,
+
+        @CommonSharedPreferences
+        basicTypesRepository: BasicTypesRepository
     ): ContactLocationInteractor {
         return ContactLocationInteractor(
             locationRepository,
-            sharedPreferencesRepository,
+            basicTypesRepository,
             geocodingRepository
         )
     }

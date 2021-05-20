@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.example.presentation.R
-import com.example.presentation.ui.delegates.ReminderDelegate
 import com.example.presentation.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.presentation.ui.services.BirthdayNotificationService
+import com.example.presentation.ui.services.RebootReminderService
 
 class ContactBirthdayReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -29,7 +29,16 @@ class ContactBirthdayReceiver : BroadcastReceiver() {
             }
 
             Intent.ACTION_BOOT_COMPLETED -> {
-                ReminderDelegate.resetAllContacts(context)
+                Intent(
+                    context,
+                    RebootReminderService::class.java
+                ).let {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(it)
+                    } else {
+                        context.startService(it)
+                    }
+                }
             }
         }
     }

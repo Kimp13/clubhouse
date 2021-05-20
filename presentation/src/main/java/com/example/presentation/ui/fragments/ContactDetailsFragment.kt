@@ -18,7 +18,6 @@ import com.example.presentation.R
 import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.delegates.ContactPhotoDelegate
-import com.example.presentation.ui.delegates.ReminderDelegate
 import com.example.presentation.ui.interfaces.ContactLocationRetriever
 import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
@@ -50,25 +49,13 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
         set(value) {
             field = value
 
-            contactEntity?.let { contact ->
-                context?.let { context ->
-                    if (field) {
-                        ReminderDelegate.setReminder(context, contact)
-                    } else {
-                        ReminderDelegate.clearReminder(context, contact.id)
-                    }
-                }
+            if (field) {
+                viewModel.setReminder()
+            } else {
+                viewModel.clearReminder()
             }
         }
-        get() {
-            contactEntity?.let { contact ->
-                context?.let { context ->
-                    return ReminderDelegate.isReminderSet(context, contact)
-                }
-            }
-
-            return false
-        }
+        get() = viewModel.hasReminder()
 
     override fun onAttach(context: Context) {
         injectDependencies()
