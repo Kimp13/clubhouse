@@ -3,7 +3,7 @@ package com.example.presentation.data.repositories
 import android.content.Context
 import com.example.domain.entities.ContactLocation
 import com.example.domain.entities.LocationEntity
-import com.example.domain.repositories.LocationRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.presentation.data.daos.ContactLocationDao
 import com.example.presentation.data.entities.toDatabaseEntity
 import com.example.presentation.data.entities.toDomainEntity

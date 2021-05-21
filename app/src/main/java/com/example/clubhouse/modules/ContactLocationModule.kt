@@ -7,9 +7,9 @@ import com.example.clubhouse.keys.ViewModelKey
 import com.example.clubhouse.qualifiers.CommonSharedPreferences
 import com.example.clubhouse.scopes.ContactLocationFragmentScope
 import com.example.domain.interactors.implementations.ContactLocationInteractor
-import com.example.domain.repositories.GeocodingRepository
 import com.example.domain.repositories.interfaces.BasicTypesRepository
-import com.example.domain.repositories.LocationRepository
+import com.example.domain.repositories.interfaces.GeocodingRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import dagger.Module
 import dagger.Provides

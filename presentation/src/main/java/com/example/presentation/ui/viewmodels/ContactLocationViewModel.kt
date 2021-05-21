@@ -9,10 +9,10 @@ import com.example.domain.interactors.implementations.ContactLocationInteractor
 import com.example.presentation.data.toLocationEntity
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
 import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 
 class ContactLocationViewModel(
     private val interactor: ContactLocationInteractor
@@ -50,7 +50,7 @@ class ContactLocationViewModel(
                                     )
                                 )
                             }
-                    } catch (e: Throwable) {
+                    } catch (e: IllegalStateException) {
                         Timber.e(e)
 
                         mutableState.postValue(

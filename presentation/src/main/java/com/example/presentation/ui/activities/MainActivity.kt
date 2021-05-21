@@ -26,26 +26,17 @@ import com.example.presentation.ui.fragments.RequestPermissionDialogFragment
 import com.example.presentation.ui.fragments.RequestReadContactsPermissionFragment
 import com.example.presentation.ui.fragments.VIEW_CONTACT_LOCATION_FRAGMENT_TAG
 import com.example.presentation.ui.fragments.ViewContactLocationFragment
-import com.example.presentation.ui.interfaces.AccessLocationPermissionRequester
-import com.example.presentation.ui.interfaces.ContactCardClickListener
-import com.example.presentation.ui.interfaces.ContactLocationRetriever
-import com.example.presentation.ui.interfaces.ContactLocationViewer
-import com.example.presentation.ui.interfaces.PoppableBackStackOwner
-import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
-import com.example.presentation.ui.interfaces.RequestPermissionDialogDismissListener
+import com.example.presentation.ui.interfaces.FragmentGateway
+import com.example.presentation.ui.interfaces.FragmentGatewayOwner
 import kotlin.properties.Delegates
 
 private const val FRAGMENT_TAG_KEY = "fragment_tag"
 
 class MainActivity :
     AppCompatActivity(),
-    ContactCardClickListener,
-    ContactLocationRetriever,
-    ContactLocationViewer,
-    PoppableBackStackOwner,
-    AccessLocationPermissionRequester,
-    ReadContactsPermissionRequester,
-    RequestPermissionDialogDismissListener {
+    FragmentGatewayOwner {
+    override val gateway = Gateway()
+
     private var currentFragmentTag: String by Delegates.notNull()
     private var onRequestLocation: ((Boolean) -> Unit)? = null
     private var onRequestContactSuccess: (() -> Unit)? = null
@@ -91,7 +82,7 @@ class MainActivity :
         )
 
         intent?.getStringExtra(CONTACT_ARG_LOOKUP_KEY)?.let {
-            onCardClick(it)
+            gateway.onCardClick(it)
         }
     }
 
@@ -122,78 +113,6 @@ class MainActivity :
             else -> super.onOptionsItemSelected(item)
         }
 
-    override fun onCardClick(lookup: String) {
-        changeFragment(
-            ContactDetailsFragment.newInstance(lookup),
-            CONTACT_DETAILS_FRAGMENT_TAG,
-            true
-        )
-    }
-
-    override fun retrieveContactLocation(contact: ContactEntity) {
-        changeFragment(
-            ContactLocationFragment.newInstance(contact),
-            CONTACT_LOCATION_FRAGMENT_TAG,
-            true
-        )
-    }
-
-    override fun viewContactLocation(contactEntity: ContactEntity) {
-        changeFragment(
-            ViewContactLocationFragment.newInstance(contactEntity.id),
-            VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
-            true
-        )
-    }
-
-    override fun viewAllContactsLocation() {
-        changeFragment(
-            ViewContactLocationFragment(),
-            VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
-            true
-        )
-    }
-
-    override fun popBackStack() {
-        supportFragmentManager.popBackStack()
-    }
-
-    override fun checkLocationPermission() = ContextCompat.checkSelfPermission(
-        this,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
-
-    override fun checkContactPermission() = ContextCompat.checkSelfPermission(
-        this,
-        Manifest.permission.READ_CONTACTS
-    ) == PackageManager.PERMISSION_GRANTED
-
-    override fun requestLocationPermission(handler: (Boolean) -> Unit) {
-        if (checkLocationPermission()) {
-            handler(true)
-        } else {
-            onRequestLocation = handler
-            requestAccessLocation.launch(
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        }
-    }
-
-    override fun requestContactPermission(onSuccess: () -> Unit) {
-        if (checkContactPermission()) {
-            onSuccess()
-        } else {
-            onRequestContactSuccess = onSuccess
-            requestReadContacts.launch(Manifest.permission.READ_CONTACTS)
-        }
-    }
-
-    override fun onRequestDialogDismissed() {
-        requestReadContacts.launch(
-            Manifest.permission.READ_CONTACTS
-        )
-    }
-
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
@@ -205,7 +124,8 @@ class MainActivity :
                     ).apply {
                         description =
                             getString(R.string.birthday_channel_description)
-                    })
+                    }
+                )
         }
     }
 
@@ -230,5 +150,81 @@ class MainActivity :
 
                 commit()
             }
+    }
+
+    inner class Gateway : FragmentGateway {
+        override fun onCardClick(lookup: String) {
+            changeFragment(
+                ContactDetailsFragment.newInstance(lookup),
+                CONTACT_DETAILS_FRAGMENT_TAG,
+                true
+            )
+        }
+
+        override fun retrieveContactLocation(contact: ContactEntity) {
+            changeFragment(
+                ContactLocationFragment.newInstance(contact),
+                CONTACT_LOCATION_FRAGMENT_TAG,
+                true
+            )
+        }
+
+        override fun viewContactLocation(contactEntity: ContactEntity) {
+            changeFragment(
+                ViewContactLocationFragment.newInstance(contactEntity.id),
+                VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
+                true
+            )
+        }
+
+        override fun viewAllContactsLocation() {
+            changeFragment(
+                ViewContactLocationFragment(),
+                VIEW_CONTACT_LOCATION_FRAGMENT_TAG,
+                true
+            )
+        }
+
+        override fun popBackStack() {
+            supportFragmentManager.popBackStack()
+        }
+
+        override fun checkLocationPermission() =
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        override fun checkContactPermission() =
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.READ_CONTACTS
+            ) == PackageManager.PERMISSION_GRANTED
+
+        override fun requestLocationPermission(handler: (Boolean) -> Unit) {
+            if (checkLocationPermission()) {
+                handler(true)
+            } else {
+                onRequestLocation = handler
+                requestAccessLocation.launch(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            }
+        }
+
+        override fun requestContactPermission(onSuccess: () -> Unit) {
+            if (checkContactPermission()) {
+                onSuccess()
+            } else {
+                onRequestContactSuccess = onSuccess
+                requestReadContacts.launch(Manifest.permission.READ_CONTACTS)
+            }
+        }
+
+        override fun onRequestDialogDismissed() {
+            requestReadContacts.launch(
+                Manifest.permission.READ_CONTACTS
+            )
+        }
     }
 }

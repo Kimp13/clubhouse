@@ -1,7 +1,7 @@
 package com.example.domain.repositories.interfaces
 
 import com.example.domain.entities.BirthDate
-import java.util.*
+import java.util.Calendar
 
 interface DateTimeRepository {
     fun nextBirthday(

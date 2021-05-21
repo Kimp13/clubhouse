@@ -5,13 +5,13 @@ import com.example.presentation.ui.services.ServiceComponent
 interface ApplicationComponent {
     fun contactListFragmentComponent(): ContactListFragmentComponent.Factory
     fun contactLocationFragmentComponent():
-            ContactLocationFragmentComponent.Factory
+        ContactLocationFragmentComponent.Factory
 
     fun contactDetailsFragmentComponent():
-            ContactDetailsFragmentComponent.Factory
+        ContactDetailsFragmentComponent.Factory
 
     fun viewContactLocationFragmentComponent():
-            ViewContactLocationComponent.Factory
+        ViewContactLocationComponent.Factory
 
     fun serviceComponent(): ServiceComponent.Factory
 }

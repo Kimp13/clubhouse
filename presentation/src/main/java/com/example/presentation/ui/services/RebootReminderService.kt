@@ -7,10 +7,10 @@ import androidx.core.app.NotificationCompat
 import com.example.domain.interactors.implementations.RebootReminderInteractor
 import com.example.presentation.R
 import com.example.presentation.di.interfaces.AppComponentOwner
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b10010101
 

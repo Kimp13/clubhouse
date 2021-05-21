@@ -1,7 +1,7 @@
 package com.example.domain.repositories.interfaces
 
 import com.example.domain.entities.ContactEntity
-import java.util.*
+import java.util.Calendar
 
 interface ReminderRepository {
     fun setReminder(contactEntity: ContactEntity, toTime: Calendar)

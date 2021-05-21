@@ -34,7 +34,7 @@ object ContactDiffCallback : DiffUtil.ItemCallback<ContactListItem>() {
             newItem is ContactListItem.Entity
         ) {
             return oldItem.contact.phoneNumber == newItem.contact.phoneNumber &&
-                    oldItem.contact.name == newItem.contact.name
+                oldItem.contact.name == newItem.contact.name
         }
 
         return oldItem == newItem
@@ -46,17 +46,21 @@ class ContactAdapter(
     private val contactCardClickListener: (SimpleContactEntity) -> Unit
 ) : AsyncListDifferDelegationAdapter<ContactListItem>(ContactDiffCallback) {
     init {
-        delegatesManager.addDelegate(contactHeaderDelegate {
-            headerClickListener()
-        })
+        delegatesManager.addDelegate(
+            contactHeaderDelegate {
+                headerClickListener()
+            }
+        )
         delegatesManager.addDelegate(contactProgressDelegate())
         delegatesManager.addDelegate(contactErrorDelegate())
-        delegatesManager.addDelegate(contactEntityDelegate { position ->
-            (items[position] as? ContactListItem.Entity)
-                ?.let { item ->
-                    contactCardClickListener(item.contact)
-                }
-        })
+        delegatesManager.addDelegate(
+            contactEntityDelegate { position ->
+                (items[position] as? ContactListItem.Entity)
+                    ?.let { item ->
+                        contactCardClickListener(item.contact)
+                    }
+            }
+        )
         delegatesManager.addDelegate(contactFooterDelegate())
     }
 }

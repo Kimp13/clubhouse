@@ -51,8 +51,9 @@ class ViewContactLocationFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (childFragmentManager.findFragmentById(R.id.map)
-                as? SupportMapFragment)?.getMapAsync(this)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+
+        mapFragment?.getMapAsync(this)
 
         (activity as? AppCompatActivity)?.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -81,13 +82,15 @@ class ViewContactLocationFragment :
                         boundsBuilder.include(point)
                         map?.addMarker(
                             MarkerOptions().position(point)
-                                .title(contact.name.let { name ->
-                                    contact.location
-                                        ?.description
-                                        ?.let {
-                                            name?.plus(": $it")
-                                        } ?: name
-                                })
+                                .title(
+                                    contact.name.let { name ->
+                                        contact.location
+                                            ?.description
+                                            ?.let {
+                                                name?.plus(": $it")
+                                            } ?: name
+                                    }
+                                )
                         )
                     }
             }

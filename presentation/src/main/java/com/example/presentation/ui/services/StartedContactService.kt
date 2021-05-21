@@ -4,10 +4,10 @@ import android.Manifest
 import android.app.Service
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
 
 interface ServiceComponent {
     interface Factory {
