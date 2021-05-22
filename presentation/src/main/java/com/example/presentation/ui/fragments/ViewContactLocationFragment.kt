@@ -15,6 +15,8 @@ import com.example.presentation.databinding.FragmentViewContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.fragments.helpers.GoogleMapHelper
 import com.example.presentation.ui.fragments.interfaces.GoogleMapHelpee
+import com.example.presentation.ui.interfaces.DialogFragmentGateway
+import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
 import com.example.presentation.ui.interfaces.FragmentStackGateway
 import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
 import com.example.presentation.ui.viewmodels.ViewContactLocationViewModel
@@ -38,6 +40,7 @@ class ViewContactLocationFragment :
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private var stackGateway: FragmentStackGateway? = null
+    private var dialogGateway: DialogFragmentGateway? = null
     private var binding: FragmentViewContactLocationBinding? = null
     private val mapHelper = GoogleMapHelper(this)
     private val viewModel: ViewContactLocationViewModel by viewModels {
@@ -47,11 +50,15 @@ class ViewContactLocationFragment :
     override fun onAttach(context: Context) {
         injectDependencies()
 
+        super.onAttach(context)
+
         if (context is FragmentStackGatewayOwner) {
             stackGateway = context.stackGateway
         }
 
-        super.onAttach(context)
+        if (context is DialogFragmentGatewayOwner) {
+            dialogGateway = context.dialogFragmentGateway
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -140,9 +147,7 @@ class ViewContactLocationFragment :
     }
 
     private fun popBackDueToIllegalState(@StringRes message: Int) {
-        val popBackRationaleFragment = GeneralDialogFragment.newInstance(message)
-        popBackRationaleFragment.show(parentFragmentManager, null)
-
-        stackGateway.popBackStack()
+        dialogGateway?.showGeneralDialog(message)
+        stackGateway?.popBackStack()
     }
 }

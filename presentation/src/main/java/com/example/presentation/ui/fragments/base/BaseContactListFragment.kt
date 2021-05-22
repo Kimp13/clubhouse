@@ -21,8 +21,10 @@ import com.example.presentation.ui.adapters.ContactAdapter
 import com.example.presentation.ui.adapters.decorations.ContactListDecoration
 import com.example.presentation.ui.adapters.decorations.ContactListDecorationProperties
 import com.example.presentation.ui.adapters.items.ContactListItem
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.FragmentStackGateway
+import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
+import com.example.presentation.ui.interfaces.PermissionGateway
+import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactListViewModel
 import javax.inject.Inject
 
@@ -33,8 +35,9 @@ abstract class BaseContactListFragment : Fragment(
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     protected var viewAdapter: ContactAdapter? = null
-    protected var gateway: FragmentGateway? = null
+    protected var stackGateway: FragmentStackGateway? = null
 
+    private var permissionGateway: PermissionGateway? = null
     private var binding: FragmentContactListBinding? = null
     private lateinit var recyclerViewDecoration: ContactListDecoration
     private val viewModel: ContactListViewModel by viewModels {
@@ -51,8 +54,12 @@ abstract class BaseContactListFragment : Fragment(
 
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is FragmentStackGatewayOwner) {
+            stackGateway = context.stackGateway
+        }
+
+        if (context is PermissionGatewayOwner) {
+            permissionGateway = context.permissionGateway
         }
 
         recyclerViewDecoration = ContactListDecoration(
@@ -163,7 +170,7 @@ abstract class BaseContactListFragment : Fragment(
             refreshContactList()
         }
 
-        gateway?.requestContactPermission {
+        permissionGateway?.requestContactPermission {
             if (viewModel.contactList.value == null) {
                 viewAdapter?.items = listOf(ContactListItem.Progress)
             }

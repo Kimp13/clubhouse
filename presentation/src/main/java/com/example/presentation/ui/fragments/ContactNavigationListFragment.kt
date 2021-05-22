@@ -12,6 +12,8 @@ import com.example.presentation.data.entities.toSimpleParcelable
 import com.example.presentation.ui.adapters.ContactAdapter
 import com.example.presentation.ui.adapters.items.ContactListItem
 import com.example.presentation.ui.fragments.base.BaseContactListFragment
+import com.example.presentation.ui.interfaces.DialogFragmentGateway
+import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
 
 const val CONTACT_NAVIGATION_LIST_FRAGMENT_TAG =
     "fragment_contact_navigation_list"
@@ -35,19 +37,24 @@ class ContactNavigationListFragment : BaseContactListFragment() {
         get() = excludedContact.id
 
     private lateinit var excludedContact: ParcelableSimpleContact
+    private var dialogGateway: DialogFragmentGateway? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        arguments?.getParcelable<ParcelableSimpleContact>(CONTACT_ARG_ENTITY)
-            ?.let {
-                excludedContact = it
-            } ?: gateway?.popBackStack()
+        excludedContact = arguments?.getParcelable(CONTACT_ARG_ENTITY) ?: run {
+            stackGateway?.popBackStack()
+            return
+        }
+
+        if (context is DialogFragmentGatewayOwner) {
+            dialogGateway = context.dialogFragmentGateway
+        }
     }
 
     override fun makeContactAdapter(): ContactAdapter {
         return ContactAdapter { toContact ->
-            gateway?.navigate(
+            stackGateway?.navigate(
                 excludedContact,
                 toContact.toParcelable()
             )
@@ -61,8 +68,8 @@ class ContactNavigationListFragment : BaseContactListFragment() {
 
     override fun updateContactList(list: List<SimpleContactEntity>) {
         if (isSearchQueryEmpty() && list.isEmpty()) {
-            dialogGateway.showGeneralDialog(R.string.set_location_of_another_contact)
-            stackGateway.popBackStack()
+            dialogGateway?.showGeneralDialog(R.string.set_location_of_another_contact)
+            stackGateway?.popBackStack()
         } else {
             viewAdapter?.items = list.map {
                 ContactListItem.Entity(it)

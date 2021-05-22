@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.fragment.app.DialogFragment
-import com.example.presentation.R
 
 private const val MESSAGE_ARG = "dialog_message"
 private const val POSITIVE_BUTTON_TEXT_ARG = "dialog_positive_button_text"
@@ -35,7 +34,7 @@ class GeneralDialogFragment : DialogFragment() {
             message: Int,
 
             @StringRes
-            positiveButtonText: Int = R.string.ok
+            positiveButtonText: Int
         ) = GeneralDialogFragment().apply {
             arguments = Bundle().apply {
                 putInt(MESSAGE_ARG, message)

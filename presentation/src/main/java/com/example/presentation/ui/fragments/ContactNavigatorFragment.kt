@@ -12,8 +12,10 @@ import com.example.presentation.R
 import com.example.presentation.data.entities.ParcelableSimpleContact
 import com.example.presentation.databinding.FragmentViewContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.DialogFragmentGateway
+import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
+import com.example.presentation.ui.interfaces.FragmentStackGateway
+import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactNavigatorViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -50,7 +52,8 @@ class ContactNavigatorFragment :
     }
 
     private var binding: FragmentViewContactLocationBinding? = null
-    private var gateway: FragmentGateway? = null
+    private var stackGateway: FragmentStackGateway? = null
+    private var dialogGateway: DialogFragmentGateway? = null
     private lateinit var contacts: Pair<ParcelableSimpleContact, ParcelableSimpleContact>
 
     override fun onAttach(context: Context) {
@@ -58,8 +61,12 @@ class ContactNavigatorFragment :
 
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is FragmentStackGatewayOwner) {
+            stackGateway = context.stackGateway
+        }
+
+        if (context is DialogFragmentGatewayOwner) {
+            dialogGateway = context.dialogFragmentGateway
         }
 
         arguments?.getParcelableArray(CONTACT_ARG_ENTITIES_PAIR)
@@ -69,7 +76,7 @@ class ContactNavigatorFragment :
             ?.takeIf { it.size == 2 }
             ?.let {
                 contacts = it[0] to it[1]
-            } ?: gateway?.popBackStack()
+            } ?: stackGateway?.popBackStack()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -117,15 +124,8 @@ class ContactNavigatorFragment :
                     )
                 )
             } ?: run {
-                GeneralDialogFragment.newInstance(
-                    R.string.navigation_sorry,
-                    R.string.ok
-                )
-                    .show(
-                        parentFragmentManager,
-                        null
-                    )
-                gateway?.popBackStack()
+                dialogGateway?.showGeneralDialog(R.string.navigation_sorry, R.string.ok)
+                stackGateway?.popBackStack()
             }
         }
 
@@ -139,7 +139,7 @@ class ContactNavigatorFragment :
     }
 
     override fun onDetach() {
-        gateway = null
+        stackGateway = null
 
         super.onDetach()
     }

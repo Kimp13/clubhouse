@@ -15,8 +15,10 @@ import com.example.domain.entities.ContactEntity
 import com.example.presentation.R
 import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.FragmentStackGateway
+import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
+import com.example.presentation.ui.interfaces.PermissionGateway
+import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import com.example.presentation.ui.views.hide
 import com.example.presentation.ui.views.setContents
@@ -45,7 +47,8 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     }
     private var contactEntity: ContactEntity? = null
     private var binding: FragmentContactDetailsBinding? = null
-    private var gateway: FragmentGateway? = null
+    private var stackGateway: FragmentStackGateway? = null
+    private var permissionGateway: PermissionGateway? = null
     private var isReminded: Boolean = false
         set(value) {
             field = value
@@ -63,8 +66,12 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is FragmentStackGatewayOwner) {
+            stackGateway = context.stackGateway
+        }
+
+        if (context is PermissionGatewayOwner) {
+            permissionGateway = context.permissionGateway
         }
     }
 
@@ -102,7 +109,8 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     }
 
     override fun onDetach() {
-        gateway = null
+        stackGateway = null
+        permissionGateway = null
 
         super.onDetach()
     }
@@ -156,13 +164,13 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
             listOf(locationDescription, editLocation).show()
             editLocation.setOnClickListener {
-                gateway?.retrieveContactLocation(contact)
+                stackGateway?.retrieveContactLocation(contact)
             }
             viewLocation.setOnClickListener {
-                gateway?.viewContactLocation(contact)
+                stackGateway?.viewContactLocation(contact)
             }
             navigate.setOnClickListener {
-                gateway?.navigateFrom(contact)
+                stackGateway?.navigateFrom(contact)
             }
 
             contact.location?.run {
@@ -196,7 +204,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
         }
 
         arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
-            gateway?.requestContactPermission {
+            permissionGateway?.requestContactPermission {
                 viewModel.setContactLookup(lookup)
             }
         }

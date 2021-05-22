@@ -29,9 +29,9 @@ class ContactListFragment : BaseContactListFragment() {
 
     override fun makeContactAdapter() = ContactAdapter(
         {
-            gateway?.viewAllContactsLocation()
+            stackGateway?.viewAllContactsLocation()
         }
     ) {
-        gateway?.onCardClick(it.lookup)
+        stackGateway?.onCardClick(it.lookup)
     }
 }

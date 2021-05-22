@@ -15,8 +15,12 @@ import com.example.presentation.data.entities.toParcelable
 import com.example.presentation.databinding.FragmentContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.fragments.helpers.MAP_CAMERA_ZOOM_TERM
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.DialogFragmentGateway
+import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
+import com.example.presentation.ui.interfaces.FragmentStackGateway
+import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
+import com.example.presentation.ui.interfaces.PermissionGateway
+import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -62,7 +66,9 @@ class ContactLocationFragment :
         viewModelFactory
     }
     private var binding: FragmentContactLocationBinding? = null
-    private var gateway: FragmentGateway? = null
+    private var stackGateway: FragmentStackGateway? = null
+    private var permissionGateway: PermissionGateway? = null
+    private var dialogGateway: DialogFragmentGateway? = null
 
     override fun onAttach(context: Context) {
         (activity?.application as? AppComponentOwner)?.applicationComponent
@@ -72,8 +78,16 @@ class ContactLocationFragment :
 
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is FragmentStackGatewayOwner) {
+            stackGateway = context.stackGateway
+        }
+
+        if (context is PermissionGatewayOwner) {
+            permissionGateway = context.permissionGateway
+        }
+
+        if (context is DialogFragmentGatewayOwner) {
+            dialogGateway = context.dialogFragmentGateway
         }
     }
 
@@ -113,7 +127,7 @@ class ContactLocationFragment :
 
             centerMap(map, point)
             changeSelectedPoint(map, point)
-        } ?: gateway?.requestLocationPermission { isGranted ->
+        } ?: permissionGateway?.requestLocationPermission { isGranted ->
             if (isGranted) {
                 observeLocation(map)
             }
@@ -121,7 +135,8 @@ class ContactLocationFragment :
     }
 
     override fun onDetach() {
-        gateway = null
+        stackGateway = null
+        permissionGateway = null
 
         super.onDetach()
     }
@@ -230,7 +245,7 @@ class ContactLocationFragment :
 
                 viewModel.state.observe(viewLifecycleOwner) { state ->
                     if (state.locationWritten) {
-                        gateway?.popBackStack()
+                        stackGateway?.popBackStack()
                     }
                 }
             }
@@ -245,14 +260,10 @@ class ContactLocationFragment :
                     state?.areMapControlsClarified
                         ?.takeIf { !it }
                         ?.let {
-                            GeneralDialogFragment.newInstance(
+                            dialogGateway?.showGeneralDialog(
                                 R.string.clarify_card_controls_text,
                                 R.string.clarify_card_controls_ok
                             )
-                                .show(
-                                    childFragmentManager,
-                                    null
-                                )
 
                             viewModel.writeMapControlsClarified()
                             viewModel.state.removeObserver(this)
