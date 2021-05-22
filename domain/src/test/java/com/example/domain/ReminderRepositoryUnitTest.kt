@@ -13,7 +13,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.util.*
+import java.util.Calendar
 
 class ReminderRepositoryUnitTest {
     private val reminderRepository: ReminderRepository = mock()
@@ -29,11 +29,14 @@ class ReminderRepositoryUnitTest {
             interactor.setReminder(contact)
         }
 
-        verify(reminderRepository).setReminder(eq(contact), argWhere {
-            it[Calendar.YEAR] == 2000 &&
+        verify(reminderRepository).setReminder(
+            eq(contact),
+            argWhere {
+                it[Calendar.YEAR] == 2000 &&
                     it[Calendar.MONTH] == Calendar.SEPTEMBER &&
                     it[Calendar.DAY_OF_MONTH] == 8
-        })
+            }
+        )
     }
 
     @Test
@@ -45,11 +48,14 @@ class ReminderRepositoryUnitTest {
             interactor.setReminder(contact)
         }
 
-        verify(reminderRepository).setReminder(eq(contact), argWhere {
-            it[Calendar.YEAR] == 1999 &&
+        verify(reminderRepository).setReminder(
+            eq(contact),
+            argWhere {
+                it[Calendar.YEAR] == 1999 &&
                     it[Calendar.MONTH] == Calendar.SEPTEMBER &&
                     it[Calendar.DAY_OF_MONTH] == 8
-        })
+            }
+        )
     }
 
     @Test
@@ -61,11 +67,14 @@ class ReminderRepositoryUnitTest {
             interactor.setReminder(contact)
         }
 
-        verify(reminderRepository).setReminder(eq(contact), argWhere {
-            it[Calendar.YEAR] == 2000 &&
+        verify(reminderRepository).setReminder(
+            eq(contact),
+            argWhere {
+                it[Calendar.YEAR] == 2000 &&
                     it[Calendar.MONTH] == Calendar.FEBRUARY &&
                     it[Calendar.DAY_OF_MONTH] == 29
-        })
+            }
+        )
     }
 
     @Test
@@ -77,11 +86,14 @@ class ReminderRepositoryUnitTest {
             interactor.setReminder(contact)
         }
 
-        verify(reminderRepository).setReminder(eq(contact), argWhere {
-            it[Calendar.YEAR] == 2004 &&
+        verify(reminderRepository).setReminder(
+            eq(contact),
+            argWhere {
+                it[Calendar.YEAR] == 2004 &&
                     it[Calendar.MONTH] == Calendar.FEBRUARY &&
                     it[Calendar.DAY_OF_MONTH] == 29
-        })
+            }
+        )
     }
 
     @Test

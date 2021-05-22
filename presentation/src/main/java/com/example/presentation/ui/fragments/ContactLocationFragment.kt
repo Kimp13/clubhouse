@@ -14,8 +14,8 @@ import com.example.presentation.data.entities.ParcelableContactLocation
 import com.example.presentation.data.entities.toParcelable
 import com.example.presentation.databinding.FragmentContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
-import com.example.presentation.ui.interfaces.AccessLocationPermissionRequester
-import com.example.presentation.ui.interfaces.PoppableBackStackOwner
+import com.example.presentation.ui.interfaces.FragmentGateway
+import com.example.presentation.ui.interfaces.FragmentGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -62,20 +62,18 @@ class ContactLocationFragment :
         viewModelFactory
     }
     private var binding: FragmentContactLocationBinding? = null
-    private var permissionRequester: AccessLocationPermissionRequester? = null
-    private var backStackOwner: PoppableBackStackOwner? = null
+    private var gateway: FragmentGateway? = null
 
     override fun onAttach(context: Context) {
-        injectDependencies()
+        (activity?.application as? AppComponentOwner)?.applicationComponent
+            ?.contactLocationFragmentComponent()
+            ?.create()
+            ?.inject(this)
 
         super.onAttach(context)
 
-        if (context is AccessLocationPermissionRequester) {
-            permissionRequester = context
-        }
-
-        if (context is PoppableBackStackOwner) {
-            backStackOwner = context
+        if (context is FragmentGatewayOwner) {
+            gateway = context.gateway
         }
     }
 
@@ -84,8 +82,8 @@ class ContactLocationFragment :
 
         checkControlsClarification()
 
-        (childFragmentManager.findFragmentById(R.id.map)
-                as? SupportMapFragment)?.getMapAsync(this)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
 
         (activity as? AppCompatActivity)?.supportActionBar?.run {
             setTitle(R.string.edit_location)
@@ -96,10 +94,12 @@ class ContactLocationFragment :
     }
 
     override fun onMapReady(map: GoogleMap?) {
-        observeAddress()
-        makeSubmitClickable()
-        makeMapClickable(map)
+        setUpFooter()
         centerMap(map)
+
+        map?.setOnMapClickListener {
+            changeSelectedPoint(map, it)
+        }
 
         viewModel.currentPoint?.let {
             map?.addMarker(MarkerOptions().position(it))
@@ -113,7 +113,7 @@ class ContactLocationFragment :
 
             centerMap(map, point)
             changeSelectedPoint(map, point)
-        } ?: permissionRequester?.requestLocationPermission { isGranted ->
+        } ?: gateway?.requestLocationPermission { isGranted ->
             if (isGranted) {
                 observeLocation(map)
             }
@@ -121,17 +121,9 @@ class ContactLocationFragment :
     }
 
     override fun onDetach() {
-        permissionRequester = null
-        backStackOwner = null
+        gateway = null
 
         super.onDetach()
-    }
-
-    private fun injectDependencies() {
-        (activity?.application as? AppComponentOwner)?.applicationComponent
-            ?.contactLocationFragmentComponent()
-            ?.create()
-            ?.inject(this)
     }
 
     private fun changeSelectedPoint(
@@ -149,14 +141,6 @@ class ContactLocationFragment :
 
             viewModel.currentPoint = it
         } ?: onNoAddressAvailable()
-    }
-
-    private fun makeMapClickable(
-        map: GoogleMap?
-    ) {
-        map?.setOnMapClickListener {
-            changeSelectedPoint(map, it)
-        }
     }
 
     private fun centerMap(
@@ -190,34 +174,6 @@ class ContactLocationFragment :
         )
     }
 
-    private fun indicateProgress() {
-        binding?.locationDescription?.visibility = View.GONE
-        binding?.submit?.visibility = View.GONE
-        binding?.progressBar?.visibility = View.VISIBLE
-    }
-
-    private fun setLocationString(location: String) {
-        binding?.locationDescription?.visibility = View.VISIBLE
-        binding?.submit?.visibility = View.VISIBLE
-        binding?.progressBar?.visibility = View.GONE
-
-        binding?.locationDescription?.text = location
-    }
-
-    private fun makeSubmitClickable() {
-        binding?.submit?.setOnClickListener {
-            arguments?.getLong(CONTACT_ARG_ID)?.let { id ->
-                viewModel.submit(id)
-
-                viewModel.state.observe(viewLifecycleOwner) { state ->
-                    if (state.locationWritten) {
-                        backStackOwner?.popBackStack()
-                    }
-                }
-            }
-        }
-    }
-
     private fun observeLocation(map: GoogleMap?) {
         viewModel.state.observe(
             viewLifecycleOwner,
@@ -243,20 +199,40 @@ class ContactLocationFragment :
         viewModel.initLocation()
     }
 
-    private fun observeAddress() {
+    private fun setUpFooter() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             if (state.progress) {
-                indicateProgress()
+                binding?.locationDescription?.visibility = View.GONE
+                binding?.submit?.visibility = View.GONE
+                binding?.progressBar?.visibility = View.VISIBLE
             } else {
-                (state.address ?: viewModel.currentPoint?.let {
+                val address = state.address ?: viewModel.currentPoint?.let {
                     getString(
                         R.string.location_fmt,
                         it.latitude,
                         it.longitude
                     )
-                })?.let {
-                    setLocationString(it)
+                }
+
+                address?.let {
+                    binding?.locationDescription?.visibility = View.VISIBLE
+                    binding?.submit?.visibility = View.VISIBLE
+                    binding?.progressBar?.visibility = View.GONE
+
+                    binding?.locationDescription?.text = it
                 } ?: onNoAddressAvailable()
+            }
+        }
+
+        binding?.submit?.setOnClickListener {
+            arguments?.getLong(CONTACT_ARG_ID)?.let { id ->
+                viewModel.submit(id)
+
+                viewModel.state.observe(viewLifecycleOwner) { state ->
+                    if (state.locationWritten) {
+                        gateway?.popBackStack()
+                    }
+                }
             }
         }
     }

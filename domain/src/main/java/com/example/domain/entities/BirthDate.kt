@@ -1,6 +1,8 @@
 package com.example.domain.entities
 
-import java.util.*
+import java.util.Calendar
+
+private const val LEAP_YEAR_DAYS_IN_FEBRUARY = 29
 
 data class BirthDate(
     val day: Int,
@@ -11,5 +13,6 @@ data class BirthDate(
             set(0, month, day)
         }.timeInMillis
 
-    fun isLeap() = day == 29 && month == 1
+    fun isLeap() = day == LEAP_YEAR_DAYS_IN_FEBRUARY &&
+        month == Calendar.FEBRUARY
 }

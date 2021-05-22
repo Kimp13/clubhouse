@@ -1,9 +1,10 @@
 package com.example.domain.repositories.implementations
 
+import com.example.domain.LEAP_YEAR_FREQUENCY
 import com.example.domain.entities.BirthDate
 import com.example.domain.isLeap
 import com.example.domain.repositories.interfaces.DateTimeRepository
-import java.util.*
+import java.util.Calendar
 
 class DateTimeRepositoryImpl : DateTimeRepository {
     override fun nextBirthday(
@@ -25,8 +26,10 @@ class DateTimeRepositoryImpl : DateTimeRepository {
 
         if (birthDate.isLeap()) {
             while (!newTime.isLeap()) {
-                newTime[Calendar.YEAR] =
-                    (newTime[Calendar.YEAR] / 4 + 1) * 4
+                newTime[Calendar.YEAR] = newTime[Calendar.YEAR]
+                    .div(LEAP_YEAR_FREQUENCY)
+                    .plus(1)
+                    .times(LEAP_YEAR_FREQUENCY)
             }
 
             newTime[Calendar.MONTH] = birthDate.month

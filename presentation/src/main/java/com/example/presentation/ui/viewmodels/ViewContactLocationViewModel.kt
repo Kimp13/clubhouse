@@ -30,7 +30,8 @@ class ViewContactLocationViewModel(
                         interactor.findContactById(id)?.let {
                             listOf(it)
                         } ?: emptyList()
-                    } ?: interactor.getAllContactsWithLocation())
+                    } ?: interactor.getAllContactsWithLocation()
+                )
             } catch (e: CancellationException) {
                 Timber.e(e)
             }

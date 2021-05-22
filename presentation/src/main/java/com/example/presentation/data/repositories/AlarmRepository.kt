@@ -10,14 +10,14 @@ import com.example.presentation.R
 import com.example.presentation.ui.fragments.CONTACT_ARG_LOOKUP_KEY
 import com.example.presentation.ui.receivers.ContactBirthdayReceiver
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Calendar
 
 class AlarmRepository(
     context: Context
 ) : ReminderRepository {
     private val contextReference = WeakReference(context)
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE)
-            as AlarmManager
+        as AlarmManager
 
     override fun setReminder(contactEntity: ContactEntity, toTime: Calendar) {
         contextReference.get()?.let { context ->

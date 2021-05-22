@@ -7,17 +7,17 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.example.presentation.R
-import com.example.presentation.ui.interfaces.RequestPermissionDialogDismissListener
+import com.example.presentation.ui.interfaces.FragmentGateway
+import com.example.presentation.ui.interfaces.FragmentGatewayOwner
 
 class RequestPermissionDialogFragment : DialogFragment() {
-    private var listener:
-            RequestPermissionDialogDismissListener? = null
+    private var gateway: FragmentGateway? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context is RequestPermissionDialogDismissListener) {
-            listener = context
+        if (context is FragmentGatewayOwner) {
+            gateway = context.gateway
         }
     }
 
@@ -32,11 +32,11 @@ class RequestPermissionDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        listener?.onRequestDialogDismissed()
+        gateway?.onRequestDialogDismissed()
     }
 
     override fun onDetach() {
-        listener = null
+        gateway = null
 
         super.onDetach()
     }

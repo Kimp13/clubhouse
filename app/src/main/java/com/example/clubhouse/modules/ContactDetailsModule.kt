@@ -10,8 +10,8 @@ import com.example.domain.interactors.implementations.ContactDetailsAndReminderI
 import com.example.domain.repositories.interfaces.BasicTypesRepository
 import com.example.domain.repositories.interfaces.ContactRepository
 import com.example.domain.repositories.interfaces.DateTimeRepository
+import com.example.domain.repositories.interfaces.LocationRepository
 import com.example.domain.repositories.interfaces.ReminderRepository
-import com.example.domain.repositories.LocationRepository
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
 import dagger.Module
 import dagger.Provides

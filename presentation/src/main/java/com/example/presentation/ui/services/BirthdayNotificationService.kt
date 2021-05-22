@@ -12,10 +12,10 @@ import com.example.presentation.R
 import com.example.presentation.di.interfaces.AppComponentOwner
 import com.example.presentation.ui.activities.MainActivity
 import com.example.presentation.ui.fragments.CONTACT_ARG_LOOKUP_KEY
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 private const val FOREGROUND_NOTIFICATION_ID = -0b1011010
 
@@ -118,7 +118,7 @@ class BirthdayNotificationService : StartedContactService() {
                                 R.string.birthday_notification_action
                             )
                             flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                                    Intent.FLAG_ACTIVITY_NEW_TASK
+                                Intent.FLAG_ACTIVITY_NEW_TASK
                         },
                         0
                     )

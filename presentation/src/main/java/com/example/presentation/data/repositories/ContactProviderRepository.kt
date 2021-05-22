@@ -2,6 +2,7 @@ package com.example.presentation.data.repositories
 
 import android.content.ContentResolver
 import android.content.Context
+import android.database.Cursor
 import android.provider.ContactsContract
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
@@ -33,13 +34,10 @@ private const val SIMPLE_CONTACT_SELECTION =
     "${ContactsContract.Contacts.DISPLAY_NAME} like ?"
 
 private const val SIMPLE_DATA_SELECTION =
-    "${ContactsContract.Data.MIMETYPE} in ('${
-        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
-    }', '${
-        ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE
-    }') and ${
-        ContactsContract.Data.LOOKUP_KEY
-    } in "
+    "${ContactsContract.Data.MIMETYPE} in ('" +
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE +
+        ", '${ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE}" +
+        "') and ${ContactsContract.Data.LOOKUP_KEY} in "
 private val DATA_PROJECTION = arrayOf(
     ContactsContract.Data.MIMETYPE,
     ContactsContract.Data.LOOKUP_KEY,
@@ -65,10 +63,10 @@ class ContactProviderRepository(
                     it.value.lookup to it.index
                 }
                 val selection = SIMPLE_DATA_SELECTION +
-                        lookupToIndex.keys.joinToString(
-                            prefix = "(",
-                            postfix = ")"
-                        ) { "?" }
+                    lookupToIndex.keys.joinToString(
+                        prefix = "(",
+                        postfix = ")"
+                    ) { "?" }
 
                 resolver.query(
                     ContactsContract.Data.CONTENT_URI,
@@ -81,33 +79,38 @@ class ContactProviderRepository(
                         do {
                             it.getStringOrNull(DATA_LOOKUP_INDEX)?.let { key ->
                                 lookupToIndex[key]
-                            }?.let(fun(i: Int) {
-                                when (it.getStringOrNull(DATA_MIMETYPE_INDEX)) {
-                                    ContactsContract
-                                        .CommonDataKinds
-                                        .Phone
-                                        .CONTENT_ITEM_TYPE -> {
-                                        it.getStringOrNull(
-                                            DATA_FIELD_INDEX
-                                        )?.let { phone ->
-                                            contacts[i].phoneNumber = phone
+                            }?.let(
+                                fun(i: Int) {
+                                    when (
+                                        it.getStringOrNull(DATA_MIMETYPE_INDEX)
+                                    ) {
+                                        ContactsContract
+                                            .CommonDataKinds
+                                            .Phone
+                                            .CONTENT_ITEM_TYPE -> {
+                                            it.getStringOrNull(
+                                                DATA_FIELD_INDEX
+                                            )?.let { phone ->
+                                                contacts[i].phoneNumber = phone
+                                            }
                                         }
-                                    }
 
-                                    ContactsContract
-                                        .CommonDataKinds
-                                        .Photo
-                                        .CONTENT_ITEM_TYPE -> {
-                                        it.getLongOrNull(
-                                            DATA_PHOTO_ID_INDEX
-                                        )?.let { rowPhotoId ->
-                                            if (rowPhotoId > 0) {
-                                                contacts[i].photoId = rowPhotoId
+                                        ContactsContract
+                                            .CommonDataKinds
+                                            .Photo
+                                            .CONTENT_ITEM_TYPE -> {
+                                            it.getLongOrNull(
+                                                DATA_PHOTO_ID_INDEX
+                                            )?.let { rowPhotoId ->
+                                                if (rowPhotoId > 0) {
+                                                    contacts[i].photoId =
+                                                        rowPhotoId
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            })
+                            )
                         } while (it.moveToNext())
                     }
                 }
@@ -167,7 +170,7 @@ class ContactProviderRepository(
         val (selection, selectionArgs) = if (query == null || query.isBlank()) {
             null to null
         } else {
-            SIMPLE_CONTACT_SELECTION to arrayOf("%${query}%")
+            SIMPLE_CONTACT_SELECTION to arrayOf("%$query%")
         }
 
         resolver.query(
@@ -243,12 +246,8 @@ class ContactProviderRepository(
         resolver: ContentResolver,
         contactEntityFramework: ContactEntity
     ): ContactEntity {
-        var name: String? = null
-        var description: String? = null
-        var birthDate: BirthDate? = null
-        var photoId: Long? = null
-        val emails = mutableListOf<String>()
-        val phones = mutableListOf<String>()
+        var result = contactEntityFramework
+        val scheme = getPopulationScheme()
 
         resolver.query(
             ContactsContract.Data.CONTENT_URI,
@@ -259,103 +258,75 @@ class ContactProviderRepository(
         )?.use {
             if (it.moveToFirst()) {
                 do {
-                    when (it.getString(DATA_MIMETYPE_INDEX)) {
-                        ContactsContract
-                            .CommonDataKinds
-                            .StructuredName
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getStringOrNull(
-                                DATA_FIELD_INDEX
-                            )?.let { newName ->
-                                name = newName
-                            }
-                        }
-
-                        ContactsContract
-                            .CommonDataKinds
-                            .Email
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getStringOrNull(
-                                DATA_FIELD_INDEX
-                            )?.let { email ->
-                                emails.add(email)
-                            }
-                        }
-
-                        ContactsContract
-                            .CommonDataKinds
-                            .Phone
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getStringOrNull(
-                                DATA_FIELD_INDEX
-                            )?.let { phone ->
-                                phones.add(phone)
-                            }
-                        }
-
-                        ContactsContract
-                            .CommonDataKinds
-                            .Note
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getStringOrNull(
-                                DATA_FIELD_INDEX
-                            )?.let { newDescription ->
-                                description = newDescription
-                            }
-                        }
-
-                        ContactsContract
-                            .CommonDataKinds
-                            .Event
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getIntOrNull(
-                                DATA_ADDITIONAL_FIELD_INDEX
-                            )?.takeIf { type ->
-                                type == ContactsContract
-                                    .CommonDataKinds
-                                    .Event
-                                    .TYPE_BIRTHDAY
-                            }?.let { _ ->
-                                it.getStringOrNull(
-                                    DATA_FIELD_INDEX
-                                )
-                                    ?.split("-")
-                                    ?.reversed()
-                                    ?.let { date ->
-                                        birthDate =
-                                            BirthDate(
-                                                date[0].toInt(),
-                                                date[1].toInt() - 1
-                                            )
-                                    }
-                            }
-                        }
-
-                        ContactsContract
-                            .CommonDataKinds
-                            .Photo
-                            .CONTENT_ITEM_TYPE -> {
-                            it.getLongOrNull(
-                                DATA_PHOTO_ID_INDEX
-                            )?.takeIf { rowPhotoId ->
-                                rowPhotoId > 0
-                            }?.let { rowPhotoId ->
-                                photoId = rowPhotoId
-                            }
-
-                        }
-                    }
+                    result = scheme[it.getStringOrNull(DATA_MIMETYPE_INDEX)]
+                        ?.invoke(it, result)
+                        ?: result
                 } while (it.moveToNext())
             }
         }
 
-        return contactEntityFramework.copy(
-            name = name,
-            description = description,
-            birthDate = birthDate,
-            photoId = photoId,
-            phones = phones,
-            emails = emails
-        )
+        return result
     }
+
+    private fun getPopulationScheme(): HashMap<String, (Cursor, ContactEntity) -> ContactEntity> =
+        hashMapOf(
+            ContactsContract.CommonDataKinds.StructuredName
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getStringOrNull(DATA_FIELD_INDEX)?.let {
+                    contact.copy(name = it)
+                } ?: contact
+            },
+
+            ContactsContract.CommonDataKinds.Email
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getStringOrNull(DATA_FIELD_INDEX)?.let {
+                    contact.copy(emails = contact.emails.plus(it))
+                } ?: contact
+            },
+
+            ContactsContract.CommonDataKinds.Phone
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getStringOrNull(DATA_FIELD_INDEX)?.let {
+                    contact.copy(phones = contact.phones.plus(it))
+                } ?: contact
+            },
+
+            ContactsContract.CommonDataKinds.Note
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getStringOrNull(DATA_FIELD_INDEX)?.let {
+                    contact.copy(description = it)
+                } ?: contact
+            },
+
+            ContactsContract.CommonDataKinds.Event
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getIntOrNull(DATA_ADDITIONAL_FIELD_INDEX)
+                    ?.takeIf {
+                        it == ContactsContract.CommonDataKinds.Event
+                            .TYPE_BIRTHDAY
+                    }
+                    ?.let { _ ->
+                        cursor.getStringOrNull(DATA_FIELD_INDEX)
+                            ?.split("-")
+                            ?.reversed()
+                            ?.let {
+                                contact.copy(
+                                    birthDate = BirthDate(
+                                        it[0].toInt(),
+                                        it[1].toInt() - 1
+                                    )
+                                )
+                            }
+                    } ?: contact
+            },
+
+            ContactsContract.CommonDataKinds.Photo
+                .CONTENT_ITEM_TYPE to { cursor, contact ->
+                cursor.getLongOrNull(DATA_PHOTO_ID_INDEX)
+                    ?.takeIf { it > 0 }
+                    ?.let {
+                        contact.copy(photoId = it)
+                    } ?: contact
+            }
+        )
 }

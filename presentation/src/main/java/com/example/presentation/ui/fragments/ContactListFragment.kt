@@ -20,9 +20,8 @@ import com.example.presentation.ui.adapters.ContactAdapter
 import com.example.presentation.ui.adapters.decorations.ContactListDecoration
 import com.example.presentation.ui.adapters.decorations.ContactListDecorationProperties
 import com.example.presentation.ui.adapters.items.ContactListItem
-import com.example.presentation.ui.interfaces.ContactCardClickListener
-import com.example.presentation.ui.interfaces.ContactLocationViewer
-import com.example.presentation.ui.interfaces.ReadContactsPermissionRequester
+import com.example.presentation.ui.interfaces.FragmentGateway
+import com.example.presentation.ui.interfaces.FragmentGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactListViewModel
 import javax.inject.Inject
 
@@ -32,8 +31,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private var cardClickListener: ContactCardClickListener? = null
-    private var locationViewer: ContactLocationViewer? = null
+    private var gateway: FragmentGateway? = null
     private var viewAdapter: ContactAdapter? = null
     private var binding: FragmentContactListBinding? = null
     private lateinit var recyclerViewDecoration: ContactListDecoration
@@ -46,12 +44,8 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
 
         super.onAttach(context)
 
-        if (context is ContactCardClickListener) {
-            cardClickListener = context
-        }
-
-        if (context is ContactLocationViewer) {
-            locationViewer = context
+        if (context is FragmentGatewayOwner) {
+            gateway = context.gateway
         }
 
         recyclerViewDecoration = ContactListDecoration(
@@ -85,7 +79,6 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
 
         setHasOptionsMenu(true)
         initializeRecyclerView()
-        initializeRefreshView()
         updateUI()
     }
 
@@ -103,8 +96,9 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
             }
         }
 
-        (menu.findItem(R.id.contactListSearch)?.actionView
-                as? SearchView)?.run {
+        val searchView = menu.findItem(R.id.contactListSearch)?.actionView as? SearchView
+
+        searchView?.run {
             queryHint = getString(R.string.search_contacts)
 
             if (viewModel.searchQuery?.isNotBlank() == true) {
@@ -112,15 +106,19 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
                 isIconified = false
             }
 
-            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?) = true
+            setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?) = true
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    search(newText)
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        viewAdapter?.items = listOf(ContactListItem.Progress)
 
-                    return true
+                        viewModel.provideContactList(newText)
+
+                        return true
+                    }
                 }
-            })
+            )
         }
     }
 
@@ -131,7 +129,7 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     }
 
     override fun onDetach() {
-        cardClickListener = null
+        gateway = null
 
         super.onDetach()
     }
@@ -156,9 +154,9 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
     private fun initializeRecyclerView() {
         binding?.recyclerView?.run {
             viewAdapter = ContactAdapter({
-                locationViewer?.viewAllContactsLocation()
+                gateway?.viewAllContactsLocation()
             }) {
-                cardClickListener?.onCardClick(it.lookup)
+                gateway?.onCardClick(it.lookup)
             }
 
             adapter = viewAdapter
@@ -184,39 +182,29 @@ class ContactListFragment : Fragment(R.layout.fragment_contact_list) {
             binding?.refreshView?.isRefreshing = false
         }
 
-        (activity as? ReadContactsPermissionRequester)?.run {
-            requestContactPermission {
-                if (viewModel.contactList.value == null) {
-                    viewAdapter?.items = listOf(ContactListItem.Progress)
-                }
-
-                viewModel.contactList.observe(viewLifecycleOwner) {
-                    updateContactList(it)
-                }
-
-                viewModel.provideContactList()
+        gateway?.requestContactPermission {
+            if (viewModel.contactList.value == null) {
+                viewAdapter?.items = listOf(ContactListItem.Progress)
             }
+
+            viewModel.contactList.observe(viewLifecycleOwner) {
+                updateContactList(it)
+            }
+
+            viewModel.provideContactList()
         }
-    }
 
-    private fun search(query: String?) {
-        viewAdapter?.items = listOf(ContactListItem.Progress)
-
-        viewModel.provideContactList(query)
-    }
-
-    private fun refreshContactList() {
-        viewModel.refreshContactList()
-
-        binding?.refreshView?.isRefreshing = true
-    }
-
-    private fun initializeRefreshView() {
         binding?.refreshView?.setColorSchemeResources(
             R.color.colorPrimary
         )
         binding?.refreshView?.setOnRefreshListener {
             refreshContactList()
         }
+    }
+
+    private fun refreshContactList() {
+        viewModel.refreshContactList()
+
+        binding?.refreshView?.isRefreshing = true
     }
 }

@@ -51,25 +51,30 @@ class ContactListDecoration(
 
         parent.children.forEachIndexed { index, view ->
             if (index < parent.childCount - 1) {
-                canvas.drawPath(path.apply {
-                    val leftX = view.left.toFloat() + props.junctionWidth / 2
-                    val rightX = view.right.toFloat() - props.junctionWidth / 2
+                canvas.drawPath(
+                    path.apply {
+                        val leftX =
+                            view.left.toFloat() + props.junctionWidth / 2
+                        val rightX =
+                            view.right.toFloat() - props.junctionWidth / 2
 
-                    val topY = view.bottom.toFloat()
-                    val bottomY = topY + props.verticalOffset
-                    val middleY = topY + (bottomY - topY) / 2
+                        val topY = view.bottom.toFloat()
+                        val bottomY = topY + props.verticalOffset
+                        val middleY = topY + (bottomY - topY) / 2
 
-                    moveTo(leftX, topY)
-                    lineTo(leftX, bottomY)
+                        moveTo(leftX, topY)
+                        lineTo(leftX, bottomY)
 
-                    moveTo(leftX, middleY)
-                    lineTo(rightX, middleY)
+                        moveTo(leftX, middleY)
+                        lineTo(rightX, middleY)
 
-                    moveTo(rightX, topY)
-                    lineTo(rightX, bottomY)
+                        moveTo(rightX, topY)
+                        lineTo(rightX, bottomY)
 
-                    close()
-                }, paint)
+                        close()
+                    },
+                    paint
+                )
             }
         }
     }
