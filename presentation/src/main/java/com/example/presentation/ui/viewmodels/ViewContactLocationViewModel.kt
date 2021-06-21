@@ -18,20 +18,32 @@ class ViewContactLocationViewModel(
 
     private val mutableContacts = MutableLiveData<List<ContactEntity>>()
 
-    fun loadContacts(contactId: Long?) {
+    fun loadAllContacts() = safeLaunch {
+        checkContactsForExistingValue()
+
+        val contactList = interactor.getAllContactsWithLocation()
+        mutableContacts.postValue(contactList)
+    }
+
+    fun loadContact(contactId: Long) = safeLaunch {
+        checkContactsForExistingValue()
+
+        val contact = interactor.findContactById(contactId)
+        contact?.let {
+            mutableContacts.postValue(listOf(it))
+        }
+    }
+
+    private fun checkContactsForExistingValue() {
         contacts.value?.let {
             mutableContacts.value = it
         }
+    }
 
+    private fun safeLaunch(block: suspend () -> Unit) {
         viewModelScope.launch {
             try {
-                mutableContacts.postValue(
-                    contactId?.let { id ->
-                        interactor.findContactById(id)?.let {
-                            listOf(it)
-                        } ?: emptyList()
-                    } ?: interactor.getAllContactsWithLocation()
-                )
+                block()
             } catch (e: CancellationException) {
                 Timber.e(e)
             }

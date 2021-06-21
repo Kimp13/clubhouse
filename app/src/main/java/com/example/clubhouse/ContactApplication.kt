@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.clubhouse.components.AnnotatedContactDetailsFragmentComponent
 import com.example.clubhouse.components.AnnotatedContactListFragmentComponent
 import com.example.clubhouse.components.AnnotatedContactLocationFragmentComponent
+import com.example.clubhouse.components.AnnotatedContactNavigatorFragmentComponent
 import com.example.clubhouse.components.AnnotatedServiceComponent
 import com.example.clubhouse.components.AnnotatedViewContactLocationFragmentComponent
 import com.example.clubhouse.modules.AppModule
@@ -40,6 +41,9 @@ interface AnnotatedApplicationComponent : ApplicationComponent {
 
     override fun viewContactLocationFragmentComponent():
         AnnotatedViewContactLocationFragmentComponent.Factory
+
+    override fun contactNavigatorFragmentComponent():
+        AnnotatedContactNavigatorFragmentComponent.Factory
 }
 
 class ContactApplication : Application(), AppComponentOwner {

@@ -57,4 +57,10 @@
     <string name="edit_location">Edit location</string>
     <string name="view_location">View location</string>
     <string name="view_all_contacts_locations">View all contacts\' locations</string>
+    <string name="navigate">Navigate</string>
+    <string name="route">Route</string>
+    <string name="navigation_sorry">Unfortunately, it was impossible to make a route between the selected contacts.</string>
+    <string name="set_location_of_the_contact">First, set the contact location.</string>
+    <string name="set_location_of_one_contact">First, set a location of at least one contact.</string>
+    <string name="set_location_of_another_contact">First, set a location of at least another one contact.</string>
 </resources>

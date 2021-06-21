@@ -10,8 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.presentation.R
 import com.example.presentation.databinding.FragmentRequestReadContactsPermissionBinding
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.FragmentStackGateway
+import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
+import com.example.presentation.ui.interfaces.PermissionGateway
+import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 
 const val REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG =
     "fragment_request_read_contacts_permission"
@@ -19,13 +21,18 @@ const val REQUEST_READ_CONTACTS_PERMISSION_FRAGMENT_TAG =
 class RequestReadContactsPermissionFragment : Fragment(
     R.layout.fragment_request_read_contacts_permission
 ) {
-    private var gateway: FragmentGateway? = null
+    private var stackGateway: FragmentStackGateway? = null
+    private var permissionGateway: PermissionGateway? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is FragmentStackGatewayOwner) {
+            stackGateway = context.stackGateway
+        }
+
+        if (context is PermissionGatewayOwner) {
+            permissionGateway = context.permissionGateway
         }
     }
 
@@ -45,13 +52,14 @@ class RequestReadContactsPermissionFragment : Fragment(
     override fun onStart() {
         super.onStart()
 
-        if (gateway?.checkContactPermission() == true) {
-            gateway?.popBackStack()
+        if (permissionGateway?.checkContactPermission() == true) {
+            stackGateway?.popBackStack()
         }
     }
 
     override fun onDetach() {
-        gateway = null
+        stackGateway = null
+        permissionGateway = null
 
         super.onDetach()
     }

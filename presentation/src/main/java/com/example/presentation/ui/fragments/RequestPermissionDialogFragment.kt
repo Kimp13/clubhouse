@@ -7,17 +7,17 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.example.presentation.R
-import com.example.presentation.ui.interfaces.FragmentGateway
-import com.example.presentation.ui.interfaces.FragmentGatewayOwner
+import com.example.presentation.ui.interfaces.PermissionGateway
+import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 
 class RequestPermissionDialogFragment : DialogFragment() {
-    private var gateway: FragmentGateway? = null
+    private var gateway: PermissionGateway? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context is FragmentGatewayOwner) {
-            gateway = context.gateway
+        if (context is PermissionGatewayOwner) {
+            gateway = context.permissionGateway
         }
     }
 

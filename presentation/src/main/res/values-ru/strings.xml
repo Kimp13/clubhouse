@@ -47,4 +47,10 @@
     <string name="edit_location">Редактировать местоположение</string>
     <string name="view_location">Посмотреть местоположение</string>
     <string name="view_all_contacts_locations">Посмотреть местоположения всех контактов</string>
+    <string name="navigate">Проложить путь</string>
+    <string name="navigation_sorry">К сожалению, было невозможно построить маршрут между выбранными контактами</string>
+    <string name="route">Маршрут</string>
+    <string name="set_location_of_the_contact">Сначала задайте местоположение этого контакта.</string>
+    <string name="set_location_of_one_contact">Сначала задайте местоположение хотя бы одного контакта.</string>
+    <string name="set_location_of_another_contact">Сначала задайте местоположение хотя бы ещё одного контакта.</string>
 </resources>

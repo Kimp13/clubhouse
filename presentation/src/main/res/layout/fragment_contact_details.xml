@@ -130,10 +130,22 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:layout_constrainedWidth="true"
-                app:layout_constraintEnd_toStartOf="@id/viewLocation"
+                app:layout_constraintEnd_toStartOf="@id/navigate"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/remindSwitch" />
+
+            <ImageView
+                android:id="@+id/navigate"
+                style="@style/MediumIconButton"
+                android:contentDescription="@string/navigate"
+                android:src="@drawable/ic_baseline_navigation_24"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@id/locationDescription"
+                app:layout_constraintEnd_toStartOf="@id/viewLocation"
+                app:layout_constraintStart_toEndOf="@id/locationDescription"
+                app:layout_constraintTop_toTopOf="@id/locationDescription" />
 
             <ImageView
                 android:id="@+id/viewLocation"
@@ -144,7 +156,7 @@
                 app:layout_constrainedWidth="true"
                 app:layout_constraintBottom_toBottomOf="@id/locationDescription"
                 app:layout_constraintEnd_toStartOf="@id/editLocation"
-                app:layout_constraintStart_toEndOf="@id/locationDescription"
+                app:layout_constraintStart_toEndOf="@id/navigate"
                 app:layout_constraintTop_toTopOf="@id/locationDescription" />
 
             <ImageView

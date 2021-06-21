@@ -13,5 +13,8 @@ interface ApplicationComponent {
     fun viewContactLocationFragmentComponent():
         ViewContactLocationComponent.Factory
 
+    fun contactNavigatorFragmentComponent():
+        ContactNavigatorFragmentComponent.Factory
+
     fun serviceComponent(): ServiceComponent.Factory
 }

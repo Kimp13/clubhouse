@@ -10,5 +10,10 @@ interface LocationRepository {
 
     suspend fun getAll(): List<ContactLocation>
 
+    suspend fun navigate(
+        fromLocation: LocationEntity,
+        toLocation: LocationEntity
+    ): List<LocationEntity>?
+
     fun getUserLastLocation(onSuccess: (LocationEntity?) -> Unit)
 }
