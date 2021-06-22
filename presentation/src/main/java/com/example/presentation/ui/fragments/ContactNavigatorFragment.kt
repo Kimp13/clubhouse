@@ -10,21 +10,20 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.domain.entities.LocationEntity
 import com.example.presentation.R
 import com.example.presentation.data.entities.ParcelableSimpleContact
+import com.example.presentation.data.toLatLng
 import com.example.presentation.databinding.FragmentViewContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
+import com.example.presentation.ui.fragments.helpers.ContactRouteDelegate
+import com.example.presentation.ui.fragments.helpers.GoogleMapHelper
+import com.example.presentation.ui.fragments.interfaces.GoogleMapHelpee
 import com.example.presentation.ui.interfaces.DialogFragmentGateway
 import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
 import com.example.presentation.ui.interfaces.FragmentStackGateway
 import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactNavigatorViewModel
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
 import javax.inject.Inject
 
 const val CONTACT_NAVIGATOR_FRAGMENT_TAG = "fragment_contact_navigator"
@@ -32,7 +31,8 @@ const val CONTACT_ARG_ENTITIES_PAIR = "argument_entities_pair"
 
 class ContactNavigatorFragment :
     Fragment(R.layout.fragment_view_contact_location),
-    OnMapReadyCallback {
+    OnMapReadyCallback,
+    GoogleMapHelpee {
     companion object {
         fun newInstance(
             from: ParcelableSimpleContact,
@@ -54,6 +54,8 @@ class ContactNavigatorFragment :
     private var binding: FragmentViewContactLocationBinding? = null
     private var stackGateway: FragmentStackGateway? = null
     private var dialogGateway: DialogFragmentGateway? = null
+    private var mapHelper: GoogleMapHelper? = null
+    private var routeDelegate: ContactRouteDelegate? = null
     private lateinit var contacts: Pair<ParcelableSimpleContact, ParcelableSimpleContact>
 
     override fun onAttach(context: Context) {
@@ -76,7 +78,9 @@ class ContactNavigatorFragment :
             ?.takeIf { it.size == 2 }
             ?.let {
                 contacts = it[0] to it[1]
-            } ?: stackGateway?.popBackStack()
+                routeDelegate = ContactRouteDelegate(contacts)
+            }
+            ?: stackGateway?.popBackStack()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -94,38 +98,16 @@ class ContactNavigatorFragment :
     }
 
     override fun onMapReady(map: GoogleMap?) {
-        viewModel.steps.observe(viewLifecycleOwner) { nullableList ->
-            nullableList?.let { list ->
-                map?.clear()
-                addMarkers(map, list)
+        mapHelper = GoogleMapHelper(map, this)
 
-                binding?.progressBar?.visibility = View.GONE
-
-                val boundsBuilder = LatLngBounds.Builder()
-                var polylineOptions = PolylineOptions()
-
-                list.forEach {
-                    val point = LatLng(
-                        it.latitude,
-                        it.longitude
-                    )
-
-                    boundsBuilder.include(point)
-                    polylineOptions = polylineOptions.add(point)
-                }
-
-                map?.addPolyline(polylineOptions)
-                map?.moveCamera(
-                    CameraUpdateFactory.newLatLngBounds(
-                        boundsBuilder.build(),
-                        resources.getDimensionPixelOffset(
-                            R.dimen.mapBoundsPadding
-                        )
-                    )
-                )
-            } ?: run {
+        viewModel.steps.observe(viewLifecycleOwner) { list ->
+            if (list == null || list.size < 2) {
                 dialogGateway?.showGeneralDialog(R.string.navigation_sorry, R.string.ok)
                 stackGateway?.popBackStack()
+            } else {
+                binding?.progressBar?.visibility = View.GONE
+
+                buildRoute(list)
             }
         }
 
@@ -133,6 +115,7 @@ class ContactNavigatorFragment :
     }
 
     override fun onDestroyView() {
+        mapHelper = null
         binding = null
 
         super.onDestroyView()
@@ -144,26 +127,15 @@ class ContactNavigatorFragment :
         super.onDetach()
     }
 
-    private fun addMarkers(
-        map: GoogleMap?,
-        list: List<LocationEntity>
-    ) {
-        map?.addMarker(
-            MarkerOptions().position(
-                LatLng(
-                    list.first().latitude,
-                    list.first().longitude
-                )
-            ).title(contacts.first.name)
-        )
+    override fun getMapPadding() = resources.getDimensionPixelOffset(
+        R.dimen.mapBoundsPadding
+    )
 
-        map?.addMarker(
-            MarkerOptions().position(
-                LatLng(
-                    list.last().latitude,
-                    list.last().longitude
-                )
-            ).title(contacts.second.name)
+    private fun buildRoute(list: List<LocationEntity>) = routeDelegate?.run {
+        mapHelper?.buildRouteBetweenPoints(
+            getFirstPointWithDescription(list),
+            getLastPointWithDescription(list),
+            list.map(LocationEntity::toLatLng)
         )
     }
 

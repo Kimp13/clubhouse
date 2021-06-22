@@ -20,6 +20,8 @@ import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
 import com.example.presentation.ui.interfaces.FragmentStackGateway
 import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
 import com.example.presentation.ui.viewmodels.ViewContactLocationViewModel
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import javax.inject.Inject
 
@@ -27,6 +29,7 @@ const val VIEW_CONTACT_LOCATION_FRAGMENT_TAG = "fragment_view_contact_location"
 
 class ViewContactLocationFragment :
     Fragment(R.layout.fragment_view_contact_location),
+    OnMapReadyCallback,
     GoogleMapHelpee {
     companion object {
         fun newInstance(contactId: Long) = ViewContactLocationFragment().apply {
@@ -42,7 +45,7 @@ class ViewContactLocationFragment :
     private var stackGateway: FragmentStackGateway? = null
     private var dialogGateway: DialogFragmentGateway? = null
     private var binding: FragmentViewContactLocationBinding? = null
-    private val mapHelper = GoogleMapHelper(this)
+    private var mapHelper: GoogleMapHelper? = null
     private val viewModel: ViewContactLocationViewModel by viewModels {
         viewModelFactory
     }
@@ -64,16 +67,17 @@ class ViewContactLocationFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        registerMapHelper()
+        registerMapReadyCallback()
         editActionBar()
 
         binding = FragmentViewContactLocationBinding.bind(view)
     }
 
-    override fun onMapReady() {
-        val contactId = arguments?.getLong(CONTACT_ARG_ID)
+    override fun onMapReady(map: GoogleMap?) {
+        mapHelper = GoogleMapHelper(map, this)
 
-        contactId?.takeIf { it != 0L }
+        arguments?.getLong(CONTACT_ARG_ID)
+            ?.takeUnless { it == 0L }
             ?.let { id ->
                 val fallbackMessage = R.string.set_location_of_the_contact
 
@@ -94,6 +98,12 @@ class ViewContactLocationFragment :
             }
     }
 
+    override fun onDestroyView() {
+        mapHelper = null
+
+        super.onDestroyView()
+    }
+
     override fun getMapPadding() = resources.getDimensionPixelOffset(
         R.dimen.mapBoundsPadding
     )
@@ -105,9 +115,9 @@ class ViewContactLocationFragment :
             ?.inject(this)
     }
 
-    private fun registerMapHelper() {
+    private fun registerMapReadyCallback() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-        mapFragment?.getMapAsync(mapHelper)
+        mapFragment?.getMapAsync(this)
     }
 
     private fun editActionBar() {
@@ -142,7 +152,7 @@ class ViewContactLocationFragment :
         if (markerPoints.isEmpty()) {
             popBackDueToIllegalState(message)
         } else {
-            mapHelper.addAndCenterMarkersWithDescription(markerPoints)
+            mapHelper?.addAndCenterMarkersWithDescription(markerPoints)
         }
     }
 
