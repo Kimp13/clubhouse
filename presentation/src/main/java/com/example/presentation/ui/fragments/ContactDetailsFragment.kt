@@ -2,12 +2,10 @@ package com.example.presentation.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -15,15 +13,12 @@ import com.example.domain.entities.ContactEntity
 import com.example.presentation.R
 import com.example.presentation.databinding.FragmentContactDetailsBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
+import com.example.presentation.ui.fragments.helpers.ContactDetailsBindingOwner
 import com.example.presentation.ui.interfaces.FragmentStackGateway
 import com.example.presentation.ui.interfaces.FragmentStackGatewayOwner
 import com.example.presentation.ui.interfaces.PermissionGateway
 import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactDetailsViewModel
-import com.example.presentation.ui.views.hide
-import com.example.presentation.ui.views.setContents
-import com.example.presentation.ui.views.setPhotoId
-import com.example.presentation.ui.views.show
 import javax.inject.Inject
 
 const val CONTACT_DETAILS_FRAGMENT_TAG = "fragment_contact_details"
@@ -46,7 +41,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
         viewModelFactory
     }
     private var contactEntity: ContactEntity? = null
-    private var binding: FragmentContactDetailsBinding? = null
+    private var bindingOwner: ContactDetailsBindingOwner? = null
     private var stackGateway: FragmentStackGateway? = null
     private var permissionGateway: PermissionGateway? = null
     private var isReminded: Boolean = false
@@ -83,9 +78,9 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
             setTitle(R.string.contact_details)
         }
 
-        binding = FragmentContactDetailsBinding.bind(view)
+        bindingOwner = ContactDetailsBindingOwner(FragmentContactDetailsBinding.bind(view))
+        bindingOwner?.initializeRefreshViewWithRefreshListener(::refreshContactDetails)
 
-        initializeRefreshView()
         setHasOptionsMenu(true)
         updateUI()
     }
@@ -95,7 +90,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
 
         inflater.inflate(R.menu.fragment_contact_details_menu, menu)
         menu.findItem(R.id.menuRefresh).setOnMenuItemClickListener {
-            binding?.refreshView?.isRefreshing = true
+            bindingOwner?.showRefreshing()
             refreshContactDetails()
 
             true
@@ -103,7 +98,7 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     }
 
     override fun onDestroyView() {
-        binding = null
+        bindingOwner = null
 
         super.onDestroyView()
     }
@@ -125,82 +120,36 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     private fun updateContact(contact: ContactEntity) {
         contactEntity = contact
 
-        binding?.run {
-            if (!refreshView.isEnabled) {
-                refreshView.isEnabled = true
-                contents.removeView(progressGroup)
+        bindingOwner?.run {
+            updateContactDetails(contact)
+            setHasBirthdayNotificationsOn(isReminded)
+
+            setBirthdaySubscriptionChangeListener { _, isChecked ->
+                isReminded = isChecked
             }
 
-            photo.setPhotoId(contact.photoId)
-            name.setContents(contact.name ?: getString(R.string.no_name))
-            description.setContents(
-                contact.description ?: getString(R.string.no_description)
-            )
-            listOf(phone1, phone2).setContents(contact.phones.iterator())
-            listOf(email1, email2).setContents(contact.emails.iterator())
-
-            contact.birthDate?.run {
-                remindSwitch.let {
-                    listOf(birthDate, clarifyRemind, it).show()
-
-                    it.isChecked = isReminded
-                    it.setOnCheckedChangeListener { _, isChecked ->
-                        isReminded = isChecked
-                    }
-                }
-
-                birthDate.text = getString(
-                    R.string.birthday_fmt,
-                    DateUtils.formatDateTime(
-                        context,
-                        timeInMillis,
-                        DateUtils.FORMAT_SHOW_DATE or
-                            DateUtils.FORMAT_NO_YEAR
-                    )
-                )
-            } ?: run {
-                listOf(birthDate, clarifyRemind, remindSwitch).hide()
-            }
-
-            listOf(locationDescription, editLocation).show()
-            editLocation.setOnClickListener {
+            setEditLocationListener {
                 stackGateway?.retrieveContactLocation(contact)
             }
-            viewLocation.setOnClickListener {
+
+            setViewLocationListener {
                 stackGateway?.viewContactLocation(contact)
             }
-            navigate.setOnClickListener {
-                stackGateway?.navigateFrom(contact)
-            }
 
-            contact.location?.run {
-                locationDescription.text = description ?: getString(
-                    R.string.location_fmt,
-                    latitude,
-                    longitude
-                )
-                listOf(viewLocation, navigate).show()
-            } ?: run {
-                locationDescription.text = getString(
-                    R.string.no_location_set
-                )
-                listOf(viewLocation, navigate).hide()
+            setNavigateListener {
+                stackGateway?.navigateFrom(contact)
             }
         }
     }
 
     private fun updateUI() {
         viewModel.error.observe(viewLifecycleOwner) {
-            binding?.contents?.children?.forEach {
-                it.visibility = View.GONE
-            }
-            binding?.errorGroup?.visibility = View.VISIBLE
+            bindingOwner?.showError()
         }
 
         viewModel.contact.observe(viewLifecycleOwner) { contact ->
             updateContact(contact)
-
-            binding?.refreshView?.isRefreshing = false
+            bindingOwner?.stopShowingRefreshing()
         }
 
         arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
@@ -213,18 +162,6 @@ class ContactDetailsFragment : Fragment(R.layout.fragment_contact_details) {
     private fun refreshContactDetails() {
         arguments?.getString(CONTACT_ARG_LOOKUP_KEY)?.let { lookup ->
             viewModel.refreshContactDetails(lookup)
-        }
-    }
-
-    private fun initializeRefreshView() {
-        binding?.refreshView?.run {
-            setColorSchemeResources(
-                R.color.colorPrimary
-            )
-            setOnRefreshListener {
-                refreshContactDetails()
-            }
-            isEnabled = false
         }
     }
 }
