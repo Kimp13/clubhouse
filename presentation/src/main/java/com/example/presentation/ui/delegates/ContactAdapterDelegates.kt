@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.presentation.R
 import com.example.presentation.ui.adapters.items.ContactListItem
+import com.example.presentation.ui.fragments.helpers.ContactPhotoHelper
 import com.hannesdorfmann.adapterdelegates4.dsl.adapterDelegate
 
 fun contactHeaderDelegate(
@@ -40,6 +41,8 @@ fun contactEntityDelegate(
     val contactName: TextView = findViewById(R.id.contactCardName)
     val contactPhone: TextView = findViewById(R.id.contactCardPhone)
 
+    val photoHelper = ContactPhotoHelper()
+
     itemView.setOnClickListener {
         val position = adapterPosition
 
@@ -51,7 +54,7 @@ fun contactEntityDelegate(
     bind {
         contactPhoto.run {
             item.contact.photoId?.let {
-                setImageURI(ContactPhotoDelegate.makePhotoUri(it))
+                setImageURI(photoHelper.makePhotoUri(it))
                 imageTintList = null
             } ?: run {
                 setImageResource(R.drawable.ic_baseline_person_24)
