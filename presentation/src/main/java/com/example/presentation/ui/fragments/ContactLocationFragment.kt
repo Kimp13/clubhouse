@@ -14,7 +14,8 @@ import com.example.presentation.data.entities.ParcelableContactLocation
 import com.example.presentation.data.entities.toParcelable
 import com.example.presentation.databinding.FragmentContactLocationBinding
 import com.example.presentation.di.interfaces.AppComponentOwner
-import com.example.presentation.ui.fragments.helpers.MAP_CAMERA_ZOOM_TERM
+import com.example.presentation.ui.fragments.helpers.ContactLocationBindingOwner
+import com.example.presentation.ui.fragments.helpers.ContactLocationMapOwner
 import com.example.presentation.ui.interfaces.DialogFragmentGateway
 import com.example.presentation.ui.interfaces.DialogFragmentGatewayOwner
 import com.example.presentation.ui.interfaces.FragmentStackGateway
@@ -23,21 +24,15 @@ import com.example.presentation.ui.interfaces.PermissionGateway
 import com.example.presentation.ui.interfaces.PermissionGatewayOwner
 import com.example.presentation.ui.viewmodels.ContactLocationViewModel
 import com.example.presentation.ui.viewmodels.states.ContactLocationState
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import javax.inject.Inject
 
 const val CONTACT_LOCATION_FRAGMENT_TAG = "fragment_contact_location"
 const val CONTACT_ARG_ID = "argument_id"
 const val CONTACT_ARG_LOCATION = "argument_location"
-
-private const val BELOVED_COMPANY_LATITUDE = 56.8463985
-private const val BELOVED_COMPANY_LONGITUDE = 53.2332288
 
 class ContactLocationFragment :
     Fragment(R.layout.fragment_contact_location),
@@ -65,16 +60,14 @@ class ContactLocationFragment :
     private val viewModel: ContactLocationViewModel by viewModels {
         viewModelFactory
     }
-    private var binding: FragmentContactLocationBinding? = null
+    private var bindingOwner: ContactLocationBindingOwner? = null
+    private var mapOwner: ContactLocationMapOwner? = null
     private var stackGateway: FragmentStackGateway? = null
     private var permissionGateway: PermissionGateway? = null
     private var dialogGateway: DialogFragmentGateway? = null
 
     override fun onAttach(context: Context) {
-        (activity?.application as? AppComponentOwner)?.applicationComponent
-            ?.contactLocationFragmentComponent()
-            ?.create()
-            ?.inject(this)
+        injectDependencies()
 
         super.onAttach(context)
 
@@ -104,34 +97,38 @@ class ContactLocationFragment :
             setDisplayHomeAsUpEnabled(true)
         }
 
-        binding = FragmentContactLocationBinding.bind(view)
+        bindingOwner = ContactLocationBindingOwner(FragmentContactLocationBinding.bind(view))
     }
 
     override fun onMapReady(map: GoogleMap?) {
+        mapOwner = ContactLocationMapOwner(map)
+        mapOwner?.setOnMapClickListener(::changeSelectedPoint)
+
         setUpFooter()
-        centerMap(map)
 
-        map?.setOnMapClickListener {
-            changeSelectedPoint(map, it)
-        }
+        val currentPoint = viewModel.currentPoint
+            ?: arguments?.getParcelable<ParcelableContactLocation>(CONTACT_ARG_LOCATION)
+                ?.run {
+                    LatLng(latitude, longitude)
+                }
 
-        viewModel.currentPoint?.let {
-            map?.addMarker(MarkerOptions().position(it))
-        } ?: arguments?.getParcelable<ParcelableContactLocation>(
-            CONTACT_ARG_LOCATION
-        )?.let {
-            val point = LatLng(
-                it.latitude,
-                it.longitude
-            )
-
-            centerMap(map, point)
-            changeSelectedPoint(map, point)
-        } ?: permissionGateway?.requestLocationPermission { isGranted ->
-            if (isGranted) {
-                observeLocation(map)
+        if (currentPoint == null) {
+            permissionGateway?.requestLocationPermission { isGranted ->
+                if (isGranted) {
+                    observeLocation()
+                }
             }
+        } else {
+            mapOwner?.centerMap(currentPoint)
+            changeSelectedPoint(currentPoint)
         }
+    }
+
+    override fun onDestroyView() {
+        bindingOwner = null
+        mapOwner = null
+
+        super.onDestroyView()
     }
 
     override fun onDetach() {
@@ -141,68 +138,28 @@ class ContactLocationFragment :
         super.onDetach()
     }
 
-    private fun changeSelectedPoint(
-        map: GoogleMap?,
-        point: LatLng?
-    ) {
-        map?.clear()
+    private fun changeSelectedPoint(point: LatLng?) {
+        mapOwner?.changeSelectedPoint(point)
 
-        point?.let {
-            map?.addMarker(MarkerOptions().position(it))
-
-            binding?.locationDescription?.visibility = View.GONE
-            binding?.submit?.visibility = View.GONE
-            binding?.progressBar?.visibility = View.VISIBLE
-
-            viewModel.currentPoint = it
-        } ?: onNoAddressAvailable()
-    }
-
-    private fun centerMap(
-        map: GoogleMap?,
-        latLng: LatLng? = null
-    ) {
-        val point = latLng ?: viewModel.currentPoint ?: LatLng(
-            BELOVED_COMPANY_LATITUDE,
-            BELOVED_COMPANY_LONGITUDE
-        )
-
-        map?.run {
-            moveCamera(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(point)
-                        .zoom(maxZoomLevel + MAP_CAMERA_ZOOM_TERM)
-                        .build()
-                )
-            )
+        if (point == null) {
+            bindingOwner?.noAddressAvailable()
+        } else {
+            bindingOwner?.showProgress()
+            viewModel.currentPoint = point
         }
     }
 
-    private fun onNoAddressAvailable() {
-        binding?.locationDescription?.visibility = View.VISIBLE
-        binding?.submit?.visibility = View.GONE
-        binding?.progressBar?.visibility = View.GONE
-
-        binding?.locationDescription?.text = getString(
-            R.string.no_location_set
-        )
-    }
-
-    private fun observeLocation(map: GoogleMap?) {
+    private fun observeLocation() {
         viewModel.state.observe(
             viewLifecycleOwner,
             object : Observer<ContactLocationState> {
                 override fun onChanged(state: ContactLocationState) {
                     state.location?.let {
                         if (!viewModel.interacted) {
-                            val point = LatLng(
-                                it.latitude,
-                                it.longitude
-                            )
+                            val point = LatLng(it.latitude, it.longitude)
 
-                            centerMap(map, point)
-                            changeSelectedPoint(map, point)
+                            mapOwner?.centerMap(point)
+                            changeSelectedPoint(point)
                         }
 
                         viewModel.state.removeObserver(this)
@@ -217,29 +174,21 @@ class ContactLocationFragment :
     private fun setUpFooter() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             if (state.progress) {
-                binding?.locationDescription?.visibility = View.GONE
-                binding?.submit?.visibility = View.GONE
-                binding?.progressBar?.visibility = View.VISIBLE
+                bindingOwner?.showProgress()
             } else {
                 val address = state.address ?: viewModel.currentPoint?.let {
-                    getString(
-                        R.string.location_fmt,
-                        it.latitude,
-                        it.longitude
-                    )
+                    getString(R.string.location_fmt, it.latitude, it.longitude)
                 }
 
-                address?.let {
-                    binding?.locationDescription?.visibility = View.VISIBLE
-                    binding?.submit?.visibility = View.VISIBLE
-                    binding?.progressBar?.visibility = View.GONE
-
-                    binding?.locationDescription?.text = it
-                } ?: onNoAddressAvailable()
+                if (address == null) {
+                    bindingOwner?.noAddressAvailable()
+                } else {
+                    bindingOwner?.setLocationDescription(address)
+                }
             }
         }
 
-        binding?.submit?.setOnClickListener {
+        bindingOwner?.setOnSubmitListener {
             arguments?.getLong(CONTACT_ARG_ID)?.let { id ->
                 viewModel.submit(id)
 
@@ -258,8 +207,8 @@ class ContactLocationFragment :
             object : Observer<ContactLocationState> {
                 override fun onChanged(state: ContactLocationState?) {
                     state?.areMapControlsClarified
-                        ?.takeIf { !it }
-                        ?.let {
+                        ?.takeUnless { it }
+                        ?.let { _ ->
                             dialogGateway?.showGeneralDialog(
                                 R.string.clarify_card_controls_text,
                                 R.string.clarify_card_controls_ok
@@ -273,5 +222,12 @@ class ContactLocationFragment :
         )
 
         viewModel.checkIfMapControlsClarified()
+    }
+
+    private fun injectDependencies() {
+        (activity?.application as? AppComponentOwner)?.applicationComponent
+            ?.contactLocationFragmentComponent()
+            ?.create()
+            ?.inject(this)
     }
 }

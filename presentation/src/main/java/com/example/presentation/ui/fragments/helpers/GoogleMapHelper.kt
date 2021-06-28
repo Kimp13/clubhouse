@@ -5,49 +5,65 @@ import com.example.presentation.data.entities.toLatLng
 import com.example.presentation.ui.fragments.interfaces.GoogleMapHelpee
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlin.math.min
 
 const val MAP_CAMERA_ZOOM_TERM = -7.5F
 
 class GoogleMapHelper(
+    private val map: GoogleMap?,
     private val helpee: GoogleMapHelpee
-) : OnMapReadyCallback {
-    var map: GoogleMap? = null
+) {
+    fun addAndCenterMarkersWithDescription(points: List<LocationWithDescription>) {
+        map?.clear()
 
-    override fun onMapReady(map: GoogleMap?) {
-        this.map = map
+        fitAndCenterLocations(points)
 
-        helpee.onMapReady()
+        points.forEach {
+            addMarkerWithDescription(it)
+        }
     }
 
-    fun addAndCenterMarkersWithDescription(
-        points: List<LocationWithDescription>
+    fun buildRouteBetweenPoints(
+        startPoint: LocationWithDescription,
+        endPoint: LocationWithDescription,
+        allPoints: List<LatLng>
     ) {
         map?.clear()
 
-        val boundsBuilder = LatLngBounds.builder()
+        addMarkerWithDescription(startPoint)
+        addMarkerWithDescription(endPoint)
+        fitAndCenterLatLngs(allPoints)
 
-        points.forEach {
-            boundsBuilder.include(it.toLatLng())
-            addMarkerWithDescription(it)
+        var polylineOptions = PolylineOptions()
+
+        allPoints.forEach {
+            polylineOptions = polylineOptions.add(it)
         }
 
-        moveCameraWithBounds(boundsBuilder.build())
-        requireZoomNotTooClose()
+        map?.addPolyline(polylineOptions)
     }
 
-    fun addMarkerWithDescription(
-        point: LocationWithDescription
-    ) {
+    fun addMarkerWithDescription(point: LocationWithDescription) {
         val markerOptions = MarkerOptions().position(point.toLatLng())
             .title(point.description)
 
-        map?.cameraPosition
-
         map?.addMarker(markerOptions)
+    }
+
+    private fun fitAndCenterLocations(points: List<LocationWithDescription>) = buildBounds {
+        points.forEach {
+            include(it.toLatLng())
+        }
+    }
+
+    private fun fitAndCenterLatLngs(points: List<LatLng>) = buildBounds {
+        points.forEach {
+            include(it)
+        }
     }
 
     private fun moveCameraWithBounds(bounds: LatLngBounds) {
@@ -64,6 +80,15 @@ class GoogleMapHelper(
         val currentZoom = cameraPosition.zoom
         val zoomToSet = min(appropriateZoomLevel, currentZoom)
 
-        map?.moveCamera(CameraUpdateFactory.zoomTo(zoomToSet))
+        moveCamera(CameraUpdateFactory.zoomTo(zoomToSet))
+    }
+
+    private fun buildBounds(block: LatLngBounds.Builder.() -> Unit) {
+        val boundsBuilder = LatLngBounds.builder()
+
+        block(boundsBuilder)
+
+        moveCameraWithBounds(boundsBuilder.build())
+        requireZoomNotTooClose()
     }
 }

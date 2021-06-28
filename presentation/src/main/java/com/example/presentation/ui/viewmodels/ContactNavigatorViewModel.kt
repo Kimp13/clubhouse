@@ -20,8 +20,7 @@ class ContactNavigatorViewModel(
     val steps: LiveData<List<LocationEntity>?>
         get() = mutableSteps
 
-    private val mutableSteps =
-        MutableLiveData<List<LocationEntity>?>()
+    private val mutableSteps = MutableLiveData<List<LocationEntity>?>()
 
     fun getSteps(
         contacts: Pair<ParcelableSimpleContact, ParcelableSimpleContact>
